@@ -468,7 +468,14 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14
 
 <script>
 // ── CONFIG ────────────────────────────────────────────────────────────────
-const ONEDRIVE_URL = 'https://1drv.ms/x/c/b7fdbbddc0a0cc7c/IQB5x0ZH67AiRpxfIW-u49LgAUO7KO8coI9ZzvTBiyRbjFU?e=1QLlP8&download=1';
+const ONEDRIVE_DIRECT = 'https://api.onedrive.com/v1.0/shares/u!aHR0cHM6Ly8xZHJ2Lm1zL3gvYy9iN2ZkYmJkZGMwYTBjYzdjL0lRQjV4MFpINjdBaVJweGZJVy11NDlMZ0FVTzdLTzhjb0k5Wnp2VEJpeVJiakZVP2U9ZVgydTBq/root/content';
+// CORS proxies — tried in order until one works
+const CORS_PROXIES = [
+  'https://corsproxy.io/?',
+  'https://api.allorigins.win/raw?url=',
+  'https://cors-anywhere.herokuapp.com/'
+];
+const ONEDRIVE_URL = CORS_PROXIES[0] + encodeURIComponent(ONEDRIVE_DIRECT);
 const REFRESH_MS = 5*60*1000;
 
 // ── STATIC VISIT DATA (field+campus by month, staff) ─────────────────────
@@ -1160,10 +1167,18 @@ async function loadData(){
     return;
   }
   $('sdot').style.background='#EF9F27';
+  let buf=null, lastErr='';
+  for(const proxy of CORS_PROXIES){
+    try{
+      const url = proxy + encodeURIComponent(ONEDRIVE_DIRECT);
+      const resp = await fetch(url, {cache:'no-cache'});
+      if(!resp.ok) throw new Error('HTTP '+resp.status);
+      buf = await resp.arrayBuffer();
+      break; // success — stop trying proxies
+    }catch(e){ lastErr=e.message; buf=null; }
+  }
   try{
-    const resp=await fetch(ONEDRIVE_URL,{cache:'no-cache'});
-    if(!resp.ok) throw new Error('HTTP '+resp.status);
-    const buf=await resp.arrayBuffer();
+    if(!buf) throw new Error('All proxies failed: '+lastErr);
     const wb=XLSX.read(buf,{type:'array'});
     const ws=wb.Sheets['Data_Entry_Visits'];
     if(!ws) throw new Error('Sheet not found');
