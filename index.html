@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>La Mentora — Admissions MIS 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{
+  --pu50:#EEEDFE;--pu200:#AFA9EC;--pu400:#7F77DD;--pu600:#534AB7;--pu800:#3C3489;--pu900:#26215C;
+  --te50:#E1F5EE;--te400:#1D9E75;--te600:#0F6E56;--te800:#085041;
+  --bl50:#E6F1FB;--bl400:#378ADD;--bl600:#185FA5;--bl800:#0C447C;
+  --am50:#FAEEDA;--am400:#EF9F27;--am600:#854F0B;--am800:#633806;
+  --co50:#FAECE7;--co600:#993C1D;--co800:#712B13;
+  --pk50:#FBEAF0;--pk400:#ED93B1;--pk600:#993556;--pk800:#72243E;
+  --gr50:#EAF3DE;--gr600:#3B6D11;--gr800:#27500A;
+  --gy100:#F1EFE8;--gy200:#D3D1C7;--gy400:#888780;--gy600:#5F5E5A;
+  --bg:#F7F6F2;--surface:#FFFFFF;--border:rgba(0,0,0,0.08);--text:#1C1C1A;--muted:#6B6A65;
+  --font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;min-height:100vh}
+.header{background:var(--pu600);padding:0 24px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.hl{display:flex;align-items:center;gap:12px}
+.logo{width:34px;height:34px;border-radius:50%;background:var(--pu50);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:11px;color:var(--pu800)}
+.bn{font-size:15px;font-weight:600;color:var(--pu50);letter-spacing:-.2px}
+.bs{font-size:11px;color:var(--pu200);margin-top:1px}
+.hr2{display:flex;align-items:center;gap:10px}
+.sdot{width:7px;height:7px;border-radius:50%;background:#5DCAA5;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.stxt{font-size:11px;color:var(--pu200)}
+#sync-time{color:var(--pu50)}
+.rbtn{font-size:11px;padding:4px 12px;border-radius:20px;border:1px solid var(--pu400);color:#CECBF6;background:transparent;cursor:pointer;font-family:var(--font)}
+.rbtn:hover{background:rgba(255,255,255,.1)}
+.tabs-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;display:flex;overflow-x:auto}
+.tab{padding:12px 14px;font-size:13px;color:var(--muted);cursor:pointer;border-bottom:2.5px solid transparent;white-space:nowrap;transition:color .15s}
+.tab.active{color:var(--pu600);border-bottom-color:var(--pu600);font-weight:500}
+.filter-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:9px 24px;display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.fl{font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-right:2px}
+.chip{font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid var(--border);color:var(--muted);cursor:pointer;background:var(--surface);user-select:none}
+.chip:hover{border-color:var(--pu400);color:var(--pu600)}
+.chip.active{background:var(--pu50);border-color:var(--pu400);color:var(--pu800);font-weight:500}
+.main{padding:20px 24px;max-width:1400px}
+.slbl{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600;margin-bottom:8px}
+.kg{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:9px;margin-bottom:20px}
+.kc{border-radius:10px;padding:13px 15px}
+.kl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px}
+.kv{font-size:21px;font-weight:600;letter-spacing:-.5px;font-family:var(--mono)}
+.ks{font-size:10px;margin-top:3px;opacity:.85}
+.kb{background:var(--bl50)}.kb .kl,.kb .ks{color:var(--bl600)}.kb .kv{color:var(--bl800)}
+.kp{background:var(--pu50)}.kp .kl,.kp .ks{color:var(--pu600)}.kp .kv{color:var(--pu900)}
+.kt{background:var(--te50)}.kt .kl,.kt .ks{color:var(--te600)}.kt .kv{color:var(--te800)}
+.kco{background:var(--co50)}.kco .kl,.kco .ks{color:var(--co600)}.kco .kv{color:var(--co800)}
+.ka{background:var(--am50)}.ka .kl,.ka .ks{color:var(--am600)}.ka .kv{color:var(--am800)}
+.kpk{background:var(--pk50)}.kpk .kl,.kpk .ks{color:var(--pk600)}.kpk .kv{color:var(--pk800)}
+.kgr{background:var(--gr50)}.kgr .kl,.kgr .ks{color:var(--gr600)}.kgr .kv{color:var(--gr800)}
+.cg{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.fw{grid-column:1/-1}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px}
+.ct{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text);margin-bottom:13px}
+.br{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.bl2{font-size:11px;color:var(--muted);width:96px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bt{flex:1;height:8px;background:var(--gy100);border-radius:4px;overflow:hidden}
+.bf{height:100%;border-radius:4px;transition:width .4s}
+.bn2{font-size:11px;color:var(--muted);width:26px;text-align:right;flex-shrink:0;font-family:var(--mono)}
+.bx{font-size:10px;color:var(--muted);width:40px;text-align:right;flex-shrink:0}
+.spl{display:flex;gap:5px;margin-top:5px;flex-wrap:wrap}
+.li{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)}
+.ld{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.funnel{display:flex;flex-direction:column;align-items:center;gap:0;padding:4px 0}
+.fstep{display:flex;flex-direction:column;align-items:flex-start;width:100%}
+.fbar{display:flex;align-items:center;height:44px;border-radius:6px;padding:0 14px;gap:10px;width:100%;overflow:hidden;position:relative}
+.fbar-inner{display:flex;align-items:center;gap:8px;min-width:0;flex-shrink:0}
+.fct{font-size:15px;font-weight:600;font-family:var(--mono);white-space:nowrap}
+.fnm{font-size:11px;font-weight:500;white-space:nowrap}
+.fpct{font-size:10px;color:var(--muted);margin-top:3px;padding-left:2px}
+.farr{display:flex;flex-direction:column;align-items:flex-start;gap:0;margin:2px 0;padding-left:14px;width:100%}
+.fline{width:1px;height:8px;background:var(--border);margin-left:0}
+.fconv{font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;display:inline-block;white-space:nowrap}
+.piv{overflow-x:auto}
+.ptbl{width:100%;border-collapse:collapse;font-size:11px;min-width:500px}
+.ptbl th{background:var(--gy100);color:var(--muted);font-weight:500;text-align:center;padding:6px 8px;border:1px solid var(--border);font-size:10px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+.ptbl th.tl{text-align:left}
+.ptbl td{padding:6px 8px;border:1px solid var(--border);text-align:center;color:var(--text);font-size:11px}
+.ptbl td.tl{text-align:left;font-weight:500}
+.ptbl tr.tr td{background:var(--pu50);font-weight:600;color:var(--pu900)}
+.spill{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:500}
+.s-r{background:var(--te50);color:var(--te800)}
+.s-d{background:var(--am50);color:var(--am800)}
+.s-s{background:var(--gy100);color:var(--gy600)}
+.fee-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.fc{display:flex;flex-direction:column;gap:7px}
+.fh{font-size:10px;font-weight:600;text-align:center;padding:5px 8px;border-radius:8px;text-transform:uppercase;letter-spacing:.04em}
+.fcard{border-radius:8px;padding:10px;text-align:center}
+.fyr{font-size:10px;margin-bottom:3px;font-weight:500}
+.famt{font-size:14px;font-weight:600;font-family:var(--mono)}
+.notice{background:var(--am50);border:1px solid #EF9F2744;border-radius:8px;padding:9px 14px;font-size:12px;color:var(--am800);margin-bottom:14px;display:none}
+.panel{display:none}.panel.active{display:block}
+.tw{overflow-x:auto}
+.srch{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.sinp{flex:1;min-width:160px;padding:6px 11px;border:1px solid var(--border);border-radius:8px;font-family:var(--font);font-size:13px;background:var(--surface);color:var(--text)}
+.sinp:focus{outline:none;border-color:var(--pu400)}
+.dtbl{width:100%;border-collapse:collapse;font-size:11px;min-width:800px}
+.dtbl th{background:var(--gy100);color:var(--muted);font-weight:500;text-align:left;padding:7px 10px;border-bottom:1px solid var(--border);font-size:10px;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;white-space:nowrap}
+.dtbl th:hover{color:var(--pu600)}
+.dtbl td{padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text);white-space:nowrap}
+.dtbl tr:last-child td{border-bottom:none}
+.dtbl tr:hover td{background:var(--pu50)}
+.pill{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:500}
+.pm{background:var(--bl50);color:var(--bl800)}
+.pf{background:var(--pk50);color:var(--pk800)}
+.pr{background:var(--te50);color:var(--te800)}
+.pd{background:var(--am50);color:var(--am800)}
+.ps{background:var(--gy100);color:var(--gy600)}
+.pc{background:var(--pu50);color:var(--pu800)}
+.fc2{font-family:var(--mono);font-size:11px}
+.pag{display:flex;align-items:center;justify-content:space-between;margin-top:10px;font-size:11px;color:var(--muted)}
+.pb{display:flex;gap:3px}
+.pbtn{padding:3px 9px;border:1px solid var(--border);border-radius:6px;cursor:pointer;background:var(--surface);font-family:var(--font);font-size:11px;color:var(--muted)}
+.pbtn:hover,.pbtn.active{background:var(--pu50);border-color:var(--pu400);color:var(--pu800)}
+.sbar{background:var(--surface);border-top:1px solid var(--border);padding:7px 24px;font-size:11px;color:var(--muted);display:flex;gap:20px;flex-wrap:wrap}
+.sbar b{color:var(--text)}
+/* stacked bar for tele x accom */
+.stk-row{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.stk-lbl{font-size:11px;color:var(--muted);width:96px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stk-bar{flex:1;height:14px;border-radius:4px;overflow:hidden;display:flex}
+.stk-num{font-size:11px;color:var(--muted);width:24px;text-align:right;flex-shrink:0;font-family:var(--mono)}
+/* staff fee table — new design */
+.sfee-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border)}
+.sfee-tbl{width:100%;border-collapse:collapse;table-layout:fixed;min-width:560px}
+.sfee-tbl thead tr:first-child th{padding:10px 12px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;border-bottom:0.5px solid var(--border);background:var(--gy100);color:var(--muted)}
+.sfee-tbl thead tr:first-child th.fh-r{background:#E1F5EE;color:#085041;border-left:1px solid #9FE1CB}
+.sfee-tbl thead tr:first-child th.fh-d{background:#FAEEDA;color:#633806;border-left:1px solid #FAC775}
+.sfee-tbl thead tr:first-child th.fh-s{background:#FAECE7;color:#712B13;border-left:1px solid #F5C4B3}
+.sfee-tbl .sub-r th{padding:6px 12px;font-size:10px;font-weight:500;border-bottom:0.5px solid var(--border);color:var(--muted);background:var(--gy100)}
+.sfee-tbl .sub-r th.sr-r{background:#E1F5EE;color:#0F6E56;border-left:1px solid #9FE1CB;text-align:right}
+.sfee-tbl .sub-r th.sr-d{background:#FAEEDA;color:#854F0B;border-left:1px solid #FAC775;text-align:right}
+.sfee-tbl .sub-r th.sr-s{background:#FAECE7;color:#993C1D;border-left:1px solid #F5C4B3;text-align:right}
+.sfee-tbl tbody tr{border-bottom:0.5px solid var(--border)}
+.sfee-tbl tbody tr:last-child{border-bottom:none}
+.sfee-tbl tbody tr:hover td{background:var(--gy100)}
+.sfee-tbl td{padding:12px 12px;vertical-align:middle}
+.sf-staff{display:flex;align-items:center;gap:8px}
+.sf-rank{width:20px;height:20px;border-radius:50%;background:#EEEDFE;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;color:#3C3489;flex-shrink:0}
+.sf-name{font-size:12px;font-weight:500;color:var(--text);white-space:nowrap}
+.sf-adm{display:inline-flex;align-items:center;justify-content:center;background:#E1F5EE;color:#085041;font-size:12px;font-weight:500;padding:3px 10px;border-radius:20px;white-space:nowrap}
+.sf-fee{text-align:right;padding:12px 12px}
+.sf-y1{font-size:14px;font-weight:500;color:var(--text);white-space:nowrap}
+.sf-y2{font-size:10px;color:var(--muted);margin-top:2px;white-space:nowrap}
+.sf-n{text-align:center;font-size:11px;color:var(--muted)}
+.sf-nil{text-align:center;color:var(--muted);font-size:16px}
+.sf-sep-r{border-left:1px solid #9FE1CB}
+.sf-sep-d{border-left:1px solid #FAC775}
+.sf-sep-s{border-left:1px solid #F5C4B3}
+.fee-legend{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+/* staff revenue bars */
+.rev-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.rev-name{font-size:12px;font-weight:500;color:var(--text);width:130px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rev-track{flex:1;height:28px;background:var(--gy100);border-radius:6px;overflow:hidden}
+.rev-fill{height:100%;border-radius:6px;display:flex;align-items:center;padding-left:10px;min-width:20px}
+.rev-amt{font-size:12px;font-weight:500;color:#fff;white-space:nowrap}
+.rev-meta{font-size:11px;color:var(--muted);white-space:nowrap;flex-shrink:0;text-align:right;min-width:90px}
+/* vibrant conversion table */
+.conv-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.conv-tbl th{padding:9px 12px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;border-bottom:2px solid var(--border);color:var(--muted);background:var(--gy100);text-align:center}
+.conv-tbl th.tl{text-align:left}
+.conv-tbl td{padding:10px 12px;border-bottom:0.5px solid var(--border);text-align:center;vertical-align:middle}
+.conv-tbl tr:last-child td{border-bottom:none}
+.conv-tbl tr:hover td{background:var(--pu50)}
+.conv-tbl td.tl{text-align:left}
+.cv-staff{display:flex;align-items:center;gap:8px}
+.cv-rank{width:20px;height:20px;border-radius:50%;background:#EEEDFE;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;color:#3C3489;flex-shrink:0}
+.cv-name{font-size:12px;font-weight:500;color:var(--text)}
+.cv-adm{display:inline-flex;align-items:center;justify-content:center;background:#E1F5EE;color:#085041;font-size:12px;font-weight:500;padding:3px 10px;border-radius:20px}
+.cv-cell{display:flex;flex-direction:column;align-items:center;gap:2px}
+.cv-pct{font-size:14px;font-weight:500}
+.cv-ratio{font-size:10px;color:var(--muted)}
+.heat-h{background:#E1F5EE;color:#085041;padding:5px 10px;border-radius:6px;display:inline-block}
+.heat-m{background:#FAEEDA;color:#633806;padding:5px 10px;border-radius:6px;display:inline-block}
+.heat-l{background:#FAECE7;color:#712B13;padding:5px 10px;border-radius:6px;display:inline-block}
+/* vibrant pivot */
+.pvib{width:100%;border-collapse:collapse;font-size:11px;min-width:600px}
+.pvib th{padding:8px 10px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;border:0.5px solid var(--border);text-align:center}
+.pvib th.tl{text-align:left}
+.pvib th.h-resi{background:#E1F5EE;color:#085041}
+.pvib th.h-day{background:#FAEEDA;color:#633806}
+.pvib th.h-semi{background:#FAECE7;color:#712B13}
+.pvib th.h-tot{background:#EEEDFE;color:#26215C}
+.pvib th.h-sub{background:var(--gy100);color:var(--muted)}
+.pvib td{padding:8px 10px;border:0.5px solid var(--border);text-align:center;color:var(--text);font-size:12px}
+.pvib td.tl{text-align:left;font-weight:500;background:var(--gy100);white-space:nowrap}
+.pvib tr.ptr td{font-weight:600;background:#EEEDFE;color:#26215C}
+.pvib tr.ptr td.tl{background:#EEEDFE;color:#26215C}
+.pv-f{background:#FBEAF0;color:#72243E;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:500;display:inline-block;min-width:22px;text-align:center}
+.pv-m{background:#E6F1FB;color:#0C447C;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:500;display:inline-block;min-width:22px;text-align:center}
+.pv-r{background:#E1F5EE;color:#085041;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:500;display:inline-block}
+.pv-d{background:#FAEEDA;color:#633806;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:500;display:inline-block}
+.pv-s{background:#FAECE7;color:#712B13;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:500;display:inline-block}
+.pv-t{background:#EEEDFE;color:#26215C;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;display:inline-block}
+/* mobile responsiveness */
+@media(max-width:900px){
+  .cg{grid-template-columns:1fr}
+  .fw{grid-column:1}
+  #all-staff-funnels{grid-template-columns:1fr 1fr!important}
+  #funnel-total{max-width:100%}
+  .funnel-side-layout{grid-template-columns:1fr!important}
+}
+@media(max-width:768px){
+  .main{padding:14px 12px}
+  .filter-bar{padding:8px 12px;gap:4px}
+  .header{padding:0 14px;height:52px}
+  .tabs-bar{padding:0 10px}
+  .tab{padding:10px 10px;font-size:12px}
+  .kg{grid-template-columns:repeat(auto-fit,minmax(110px,1fr))}
+  .kv{font-size:17px}
+  .card{padding:12px}
+  .sfee-wrap{overflow-x:auto}
+  #all-staff-funnels{grid-template-columns:1fr!important}
+  .cg{gap:10px}
+  .fee-grid{grid-template-columns:1fr}
+  .conv-tbl{font-size:11px}
+  .conv-tbl th,.conv-tbl td{padding:7px 8px}
+  .piv{overflow-x:auto}
+  .rev-meta{display:none}
+}
+@media(max-width:520px){
+  .bn{font-size:13px}
+  .bs{display:none}
+  .stxt{display:none}
+  .rbtn{display:none}
+  .kg{grid-template-columns:1fr 1fr}
+  .kv{font-size:16px}
+  .kl{font-size:9px}
+  .ks{font-size:9px}
+  .tab{padding:9px 8px;font-size:11px}
+  .filter-bar .fl{display:none}
+  .chip{font-size:10px;padding:3px 8px}
+  .sf-y1{font-size:12px}
+  .sf-name{font-size:11px}
+  .sfee-tbl thead tr:first-child th,.sfee-tbl .sub-r th,.sf-fee,.sfee-tbl td{padding:7px 6px}
+  .dtbl th,.dtbl td{padding:7px 7px;font-size:11px}
+  .sbar{gap:10px;font-size:10px}
+  .fee-grid{grid-template-columns:1fr}
+  #all-staff-funnels{grid-template-columns:1fr!important}
+  .funnel-demo-grid{grid-template-columns:1fr!important}
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="hl">
+    <div class="logo">LM</div>
+    <div><div class="bn">La Mentora — Adibatla</div><div class="bs">Admissions MIS · 2025–26</div></div>
+  </div>
+  <div class="hr2">
+    <div class="sdot" id="sdot"></div>
+    <span class="stxt">Auto-refresh 5 min &nbsp;|&nbsp; <span id="sync-time">—</span></span>
+    <button class="rbtn" onclick="loadData()">Refresh now</button>
+  </div>
+</div>
+
+<div class="tabs-bar">
+  <div class="tab active" onclick="switchTab('overview',this)">Overview</div>
+  <div class="tab" onclick="switchTab('staff',this)">Staff performance</div>
+  <div class="tab" onclick="switchTab('tele',this)">Tele-counselor</div>
+  <div class="tab" onclick="switchTab('academic',this)">Academic decisions</div>
+  <div class="tab" onclick="switchTab('fees',this)">Fee summary</div>
+  <div class="tab" onclick="switchTab('data',this)">Raw data</div>
+</div>
+
+<div class="filter-bar">
+  <span class="fl">Month:</span>
+  <div class="chip active" onclick="setFilter(this,'month','all')">All</div>
+  <div class="chip" onclick="setFilter(this,'month','Oct 2025')">Oct 25</div>
+  <div class="chip" onclick="setFilter(this,'month','Nov 2025')">Nov 25</div>
+  <div class="chip" onclick="setFilter(this,'month','Dec 2025')">Dec 25</div>
+  <div class="chip" onclick="setFilter(this,'month','Jan 2026')">Jan 26</div>
+  <div class="chip" onclick="setFilter(this,'month','Feb 2026')">Feb 26</div>
+  <div class="chip" onclick="setFilter(this,'month','Mar 2026')">Mar 26</div>
+  <div class="chip" onclick="setFilter(this,'month','Apr 2026')">Apr 26</div>
+  <span class="fl" style="margin-left:6px">Gender:</span>
+  <div class="chip active" onclick="setFilter(this,'gender','all')">All</div>
+  <div class="chip" onclick="setFilter(this,'gender','Male')">Male</div>
+  <div class="chip" onclick="setFilter(this,'gender','Female')">Female</div>
+  <span class="fl" style="margin-left:6px">Accommodation:</span>
+  <div class="chip active" onclick="setFilter(this,'accom','all')">All</div>
+  <div class="chip" onclick="setFilter(this,'accom','Residential')">Residential</div>
+  <div class="chip" onclick="setFilter(this,'accom','Day Scholar')">Day Scholar</div>
+  <div class="chip" onclick="setFilter(this,'accom','Semi Residential')">Semi Residential</div>
+</div>
+
+<div class="main">
+  <div class="notice" id="notice"><b>Note:</b> Could not load live OneDrive data. Showing saved data. <span id="notice-detail"></span></div>
+
+  <!-- OVERVIEW -->
+  <div class="panel active" id="panel-overview">
+    <div class="slbl">Key metrics</div>
+    <div class="kg">
+      <div class="kc kb"><div class="kl">Field visits</div><div class="kv" id="k-fv">2,101</div><div class="ks">Total Oct 25–Apr 26</div></div>
+      <div class="kc kp"><div class="kl">Campus visits</div><div class="kv" id="k-cv">371</div><div class="ks">Adibatla campus</div></div>
+      <div class="kc kt"><div class="kl">Admissions</div><div class="kv" id="k-adm">79</div><div class="ks">All courses combined</div></div>
+      <div class="kc kco"><div class="kl">Field → Campus</div><div class="kv" id="k-fc">17.7%</div><div class="ks">371 of 2,101 visits</div></div>
+      <div class="kc ka"><div class="kl">Campus → Admission</div><div class="kv" id="k-ca">21.3%</div><div class="ks">79 of 371 campus visits</div></div>
+      <div class="kc kgr"><div class="kl">Total yr 1 fee value</div><div class="kv" id="k-f1">₹1.00Cr</div><div class="ks">Finalised, not collected</div></div>
+      <div class="kc kpk"><div class="kl">Total yr 2 fee value</div><div class="kv" id="k-f2">₹1.13Cr</div><div class="ks">Finalised, not collected</div></div>
+    </div>
+    <div class="cg">
+      <div class="card fw" style="padding:16px">
+        <div class="ct" style="margin-bottom:12px">Overall conversion funnel</div>
+        <div id="funnel-total" style="max-width:400px;margin:0 auto"></div>
+      </div>
+      <div class="card fw" style="padding:16px">
+        <div class="ct" style="margin-bottom:12px">Per-staff funnels</div>
+        <div id="all-staff-funnels" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px"></div>
+      </div>
+      <div class="card fw">
+        <div class="ct">Monthly visits vs admissions</div>
+        <div style="display:flex;gap:14px;margin-bottom:8px">
+          <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)"><span style="width:16px;height:3px;background:var(--pu600);display:inline-block;border-radius:2px"></span>Visits</span>
+          <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)"><span style="width:16px;height:0;display:inline-block;border-top:3px dashed var(--te400)"></span>Admissions (right axis)</span>
+        </div>
+        <div style="position:relative;height:170px"><canvas id="trend-chart" role="img" aria-label="Monthly visits vs admissions">Monthly data.</canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STAFF -->
+  <div class="panel" id="panel-staff">
+    <div class="cg">
+      <div class="card">
+        <div class="ct">Field visit → campus visit → admission (per staff)</div>
+        <div id="staff-funnel-rows"></div>
+        <div class="spl" style="margin-top:10px">
+          <div class="li"><div class="ld" style="background:var(--bl400)"></div>Field visits</div>
+          <div class="li"><div class="ld" style="background:var(--pu400)"></div>Campus visits</div>
+          <div class="li"><div class="ld" style="background:var(--te400)"></div>Admissions</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ct">Conversion rates per staff</div>
+        <div style="overflow-x:auto">
+          <table class="ptbl" style="min-width:300px" id="staff-conv-tbl"></table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ct">Admissions by accommodation type — per staff</div>
+        <div id="staff-accom-bars"></div>
+        <div class="spl" style="margin-top:8px">
+          <div class="li"><div class="ld" style="background:#1D9E75"></div>Residential</div>
+          <div class="li"><div class="ld" style="background:#EF9F27"></div>Day Scholar</div>
+          <div class="li"><div class="ld" style="background:#D85A30"></div>Semi Residential</div>
+        </div>
+      </div>
+      <div class="card fw">
+        <div class="ct">Avg fee finalised by staff & accommodation type</div>
+        <div class="fee-legend">
+          <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)"><span style="width:9px;height:9px;border-radius:2px;background:#1D9E75;display:inline-block"></span>Residential</span>
+          <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)"><span style="width:9px;height:9px;border-radius:2px;background:#EF9F27;display:inline-block"></span>Day Scholar</span>
+          <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)"><span style="width:9px;height:9px;border-radius:2px;background:#D85A30;display:inline-block"></span>Semi Residential</span>
+          <span style="font-size:10px;color:var(--muted);font-style:italic;margin-left:auto">Yr 1 large · Yr 2 below · Count = no. of students</span>
+        </div>
+        <div class="sfee-wrap"><table class="sfee-tbl" id="staff-fee-tbl"></table></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TELE -->
+  <div class="panel" id="panel-tele">
+    <div class="cg">
+      <div class="card">
+        <div class="ct">Admissions by tele-counselor</div>
+        <div id="tele-bars"></div>
+      </div>
+      <div class="card">
+        <div class="ct">Accommodation type count per tele-counselor</div>
+        <div style="overflow-x:auto">
+          <table class="ptbl" style="min-width:340px" id="tele-accom-tbl"></table>
+        </div>
+        <div class="spl" style="margin-top:10px">
+          <div class="li"><div class="ld" style="background:#1D9E75"></div>Residential</div>
+          <div class="li"><div class="ld" style="background:#EF9F27"></div>Day Scholar</div>
+          <div class="li"><div class="ld" style="background:#D85A30"></div>Semi Residential</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACADEMIC DECISIONS -->
+  <div class="panel" id="panel-academic">
+    <div class="cg">
+      <div class="card">
+        <div class="ct">Accommodation & gender</div>
+        <div style="margin-bottom:12px">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:500">Accommodation type</div>
+          <div style="display:flex;height:12px;border-radius:6px;overflow:hidden" id="accom-bar"></div>
+          <div class="spl" id="accom-leg" style="margin-top:5px"></div>
+        </div>
+        <div style="margin-bottom:12px">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:500">Gender</div>
+          <div style="display:flex;height:12px;border-radius:6px;overflow:hidden" id="gender-bar"></div>
+          <div class="spl" id="gender-leg" style="margin-top:5px"></div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:7px;font-weight:500">Admissions by course</div>
+        <div id="course-bars"></div>
+      </div>
+      <div class="card fw"><div class="ct">Course × accommodation × gender</div><div class="piv"><table class="ptbl" id="pivot-tbl"></table></div></div>
+    </div>
+  </div>
+
+  <!-- FEES -->
+  <div class="panel" id="panel-fees">
+    <div class="slbl">Average fee finalised by accommodation type</div>
+    <div class="card" style="margin-bottom:12px"><div class="fee-grid" id="fee-grid"></div></div>
+    <div class="cg" style="margin-bottom:12px">
+      <div class="card fw">
+        <div class="ct">Total fee value generated by staff (Yr 1 + Yr 2)</div>
+        <div id="staff-revenue"></div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <div class="ct">Avg fee finalised by staff & accommodation type</div>
+      <div class="fee-legend">
+        <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)"><span style="width:9px;height:9px;border-radius:2px;background:#1D9E75;display:inline-block"></span>Residential</span>
+        <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)"><span style="width:9px;height:9px;border-radius:2px;background:#EF9F27;display:inline-block"></span>Day Scholar</span>
+        <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)"><span style="width:9px;height:9px;border-radius:2px;background:#D85A30;display:inline-block"></span>Semi Residential</span>
+        <span style="font-size:10px;color:var(--muted);font-style:italic;margin-left:auto">Yr 1 large · Yr 2 below · Count = no. of students</span>
+      </div>
+      <div class="sfee-wrap"><table class="sfee-tbl" id="staff-fee-tbl2"></table></div>
+    </div>
+    <div class="card"><div class="ct">Yr 1 fee distribution by range</div><div style="position:relative;height:190px"><canvas id="fee-chart" role="img" aria-label="Fee range distribution">Fee ranges.</canvas></div></div>
+  </div>
+
+  <!-- RAW DATA -->
+  <div class="panel" id="panel-data">
+    <div class="card">
+      <div class="srch">
+        <input class="sinp" type="text" id="srch-inp" placeholder="Search student, staff, course…" oninput="renderTable()">
+        <select class="sinp" id="f-course" onchange="renderTable()" style="flex:0;min-width:130px">
+          <option value="">All courses</option>
+          <option>Excelor - N</option><option>Excelor-I</option><option>Charka Plus</option><option>Elite-40</option>
+        </select>
+      </div>
+      <div class="tw">
+        <table class="dtbl">
+          <thead><tr>
+            <th onclick="srtTbl('date')">Date ↕</th><th onclick="srtTbl('student')">Student ↕</th>
+            <th onclick="srtTbl('staff')">Staff ↕</th><th onclick="srtTbl('course')">Course ↕</th>
+            <th>Gender</th><th>Accommodation</th>
+            <th onclick="srtTbl('fee1')">Yr 1 fee ↕</th><th onclick="srtTbl('fee2')">Yr 2 fee ↕</th>
+            <th onclick="srtTbl('tele')">Tele-counselor ↕</th>
+          </tr></thead>
+          <tbody id="dtbody"></tbody>
+        </table>
+      </div>
+      <div class="pag"><span id="pg-info">—</span><div class="pb" id="pg-btns"></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="sbar">
+  <span>Source: <b>OneDrive (live)</b></span>
+  <span>Records: <b id="sb-tot">79</b></span>
+  <span>Updated: <b id="sb-time">—</b></span>
+  <span>Next refresh: <b id="sb-next">5:00</b></span>
+</div>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────────────────
+const ONEDRIVE_URL = 'https://1drv.ms/x/c/b7fdbbddc0a0cc7c/IQB5x0ZH67AiRpxfIW-u49LgAUO7KO8coI9ZzvTBiyRbjFU?e=1QLlP8&download=1';
+const REFRESH_MS = 5*60*1000;
+
+// ── STATIC VISIT DATA (field+campus by month, staff) ─────────────────────
+const MONTHLY=[
+  {m:'Oct 25',fv:0,cv:5,adm:1},{m:'Nov 25',fv:153,cv:72,adm:1},
+  {m:'Dec 25',fv:417,cv:54,adm:10},{m:'Jan 26',fv:441,cv:60,adm:5},
+  {m:'Feb 26',fv:391,cv:49,adm:14},{m:'Mar 26',fv:401,cv:49,adm:20},
+  {m:'Apr 26',fv:298,cv:82,adm:28}
+];
+const TOTAL_FV=2101, TOTAL_CV=371;
+// These get overwritten when live data loads from OneDrive
+let TOTAL_FV_LIVE=2101, TOTAL_CV_LIVE=371;
+let MONTHLY_LIVE=[...[]]; // filled from live data; falls back to MONTHLY
+// Staff with field visits only (exclude N Ravi Kumar)
+const STAFF_DATA={
+  'Kishore Reddy N':{fv:409,cv:88},'Srinivas S':{fv:208,cv:114},
+  'Sudhakar B':{fv:289,cv:86},'Vijay Kumar Vemula':{fv:216,cv:23},
+  'Nagaiah Ch':{fv:146,cv:18},
+  'Nagaraju Bandela':{fv:275,cv:12},'Sathish Munavath':{fv:343,cv:10}
+};
+// Monthly FV/CV per staff (from Excel)
+const STAFF_MONTHLY={
+  'Kishore Reddy N':[{m:'Oct 2025',fv:0,cv:2},{m:'Nov 2025',fv:65,cv:19},{m:'Dec 2025',fv:68,cv:9},{m:'Jan 2026',fv:47,cv:11},{m:'Feb 2026',fv:71,cv:11},{m:'Mar 2026',fv:76,cv:10},{m:'Apr 2026',fv:82,cv:26}],
+  'Srinivas S':[{m:'Oct 2025',fv:0,cv:2},{m:'Nov 2025',fv:12,cv:29},{m:'Dec 2025',fv:24,cv:21},{m:'Jan 2026',fv:23,cv:20},{m:'Feb 2026',fv:41,cv:7},{m:'Mar 2026',fv:70,cv:16},{m:'Apr 2026',fv:38,cv:19}],
+  'Sudhakar B':[{m:'Oct 2025',fv:0,cv:1},{m:'Nov 2025',fv:37,cv:10},{m:'Dec 2025',fv:58,cv:12},{m:'Jan 2026',fv:33,cv:11},{m:'Feb 2026',fv:58,cv:16},{m:'Mar 2026',fv:60,cv:16},{m:'Apr 2026',fv:43,cv:20}],
+  'Vijay Kumar Vemula':[{m:'Nov 2025',fv:0,cv:1},{m:'Dec 2025',fv:27,cv:2},{m:'Jan 2026',fv:105,cv:8},{m:'Feb 2026',fv:54,cv:5},{m:'Mar 2026',fv:25,cv:1},{m:'Apr 2026',fv:5,cv:6}],
+  'Nagaiah Ch':[{m:'Nov 2025',fv:1,cv:5},{m:'Dec 2025',fv:1,cv:3},{m:'Jan 2026',fv:21,cv:5},{m:'Feb 2026',fv:33,cv:0},{m:'Mar 2026',fv:45,cv:2},{m:'Apr 2026',fv:45,cv:3}],
+  'Bhagath S':[{m:'Nov 2025',fv:38,cv:2},{m:'Dec 2025',fv:23,cv:2},{m:'Jan 2026',fv:6,cv:3},{m:'Feb 2026',fv:0,cv:1}],
+  'Nagaraju Bandela':[{m:'Nov 2025',fv:0,cv:6},{m:'Dec 2025',fv:72,cv:3},{m:'Jan 2026',fv:78,cv:0},{m:'Feb 2026',fv:51,cv:1},{m:'Mar 2026',fv:57,cv:0},{m:'Apr 2026',fv:17,cv:2}],
+  'Sathish Munavath':[{m:'Dec 2025',fv:77,cv:1},{m:'Jan 2026',fv:71,cv:1},{m:'Feb 2026',fv:59,cv:7},{m:'Mar 2026',fv:68,cv:1},{m:'Apr 2026',fv:68,cv:0}]
+};
+
+// ── TARGETS & DEADLINE ────────────────────────────────────────────────────
+const TARGETS={
+  'Kishore Reddy N':90,'Srinivas S':80,'Sudhakar B':50,
+  'Vijay Kumar Vemula':40,'Nagaiah Ch':50,'Nagaraju Bandela':40,'Sathish Munavath':40
+};
+const DEADLINE_LABEL='Jun 15, 2026';
+const WORKING_DAYS_LEFT=34; // ~34 working days from Apr 29 to Jun 15
+
+// ── FALLBACK ADMISSIONS DATA ───────────────────────────────────────────────
+const FALLBACK=[{"date":"28 Apr 2026","staff":"Srinivas S","student":"Sk. Ashraf","gender":"Male","accom":"Residential","course":"Charka Plus","fee1":178000,"fee2":198000,"tele":"Pooja"},{"date":"27 Apr 2026","staff":"Kishore Reddy N","student":"Goske Sri Saahithi","gender":"Female","accom":"Residential","course":"Charka Plus","fee1":168000,"fee2":188000,"tele":"Akshitha"},{"date":"26 Apr 2026","staff":"Kishore Reddy N","student":"S. Charvy","gender":"Female","accom":"Day Scholar","course":"Charka Plus","fee1":94000,"fee2":104000,"tele":"Ch Shivaleela"},{"date":"26 Apr 2026","staff":"Kishore Reddy N","student":"Nandyala Soumith Reddy","gender":"Male","accom":"Day Scholar","course":"Excelor - N","fee1":87000,"fee2":97000,"tele":"Akshitha"},{"date":"26 Apr 2026","staff":"Kishore Reddy N","student":"Pallemoni Vaishnavi","gender":"Female","accom":"Residential","course":"Excelor - N","fee1":180000,"fee2":200000,"tele":"Akshitha"},{"date":"23 Apr 2026","staff":"N Ravi Kumar","student":"Edulakanti Akshay","gender":"Male","accom":"Residential","course":"Excelor-I","fee1":190000,"fee2":210000,"tele":"Self"},{"date":"23 Apr 2026","staff":"Nagaiah Ch","student":"Korra Vikram Chawhan","gender":"Male","accom":"Residential","course":"Excelor - N","fee1":175000,"fee2":195000,"tele":"Neelima"},{"date":"22 Apr 2026","staff":"Kishore Reddy N","student":"Dasari Sai Charan","gender":"Male","accom":"Residential","course":"Excelor - N","fee1":170000,"fee2":190000,"tele":"Akshitha"},{"date":"22 Apr 2026","staff":"Srinivas S","student":"Mood Lowkhya Singh","gender":"Female","accom":"Residential","course":"Excelor-I","fee1":185000,"fee2":205000,"tele":"Pooja"},{"date":"19 Apr 2026","staff":"Srinivas S","student":"Lavudiya Anesh Raj Chouhan","gender":"Male","accom":"Residential","course":"Excelor-I","fee1":180000,"fee2":200000,"tele":"Pooja"},{"date":"19 Apr 2026","staff":"Sudhakar B","student":"E. Nithish Naidu","gender":"Male","accom":"Residential","course":"Excelor - N","fee1":170000,"fee2":190000,"tele":"Tejaswini"},{"date":"19 Apr 2026","staff":"Sudhakar B","student":"S.B. Nikhil","gender":"Male","accom":"Residential","course":"Excelor - N","fee1":170000,"fee2":190000,"tele":"Tejaswini"},{"date":"19 Apr 2026","staff":"Sudhakar B","student":"T. Vishnu Vardhan","gender":"Male","accom":"Residential","course":"Excelor - N","fee1":170000,"fee2":190000,"tele":"Tejaswini"},{"date":"18 Apr 2026","staff":"Kishore Reddy N","student":"Devoju Anirudh","gender":"Male","accom":"Residential","course":"Excelor - N","fee1":165000,"fee2":185000,"tele":"Ch Shivaleela"},{"date":"18 Apr 2026","staff":"Srinivas S","student":"Kalvacherla Usha Sri","gender":"Female","accom":"Residential","course":"Excelor-I","fee1":175000,"fee2":195000,"tele":"Sucharitha"},{"date":"17 Apr 2026","staff":"Srinivas S","student":"Pabbu Yashwanth Goud","gender":"Male","accom":"Residential","course":"Excelor - N","fee1":175000,"fee2":195000,"tele":"Pooja"},{"date":"16 Apr 2026","staff":"Srinivas S","student":"Talakola Varshitha","gender":"Female","accom":"Residential","course":"Excelor-I","fee1":175000,"fee2":195000,"tele":"Pooja"},{"date":"13 Apr 2026","staff":"Srinivas S","student":"P. Sai Sriyan Reddy","gender":"Male","accom":"Day Scholar","course":"Excelor - N","fee1":102500,"fee2":112000,"tele":"Pooja"},{"date":"13 Apr 2026","staff":"Srinivas S","student":"Donkani Mani Goud","gender":"Male","accom":"Day Scholar","course":"Excelor-I","fee1":107000,"fee2":117000,"tele":"Pooja"},{"date":"13 Apr 2026","staff":"Kishore Reddy N","student":"Reesha Tharunam","gender":"Female","accom":"Day Scholar","course":"Excelor - N","fee1":97000,"fee2":107000,"tele":"Akshitha"},{"date":"09 Apr 2026","staff":"Kishore Reddy N","student":"Tekula Sai Ruthwik Reddy","gender":"Male","accom":"Residential","course":"Excelor - N","fee1":180000,"fee2":200000,"tele":"Akshitha"},{"date":"08 Apr 2026","staff":"Srinivas S","student":"Panjam Adithya Kumar Reddy","gender":"Male","accom":"Residential","course":"Excelor - N","fee1":180000,"fee2":200000,"tele":"Pooja"},{"date":"07 Apr 2026","staff":"Kishore Reddy N","student":"Aenuvu Chethan Reddy","gender":"Male","accom":"Day Scholar","course":"Excelor - N","fee1":102000,"fee2":112000,"tele":"Akshitha"},{"date":"04 Apr 2026","staff":"Srinivas S","student":"S. Charitha","gender":"Female","accom":"Residential","course":"Excelor - N","fee1":170000,"fee2":190000,"tele":"Pooja"},{"date":"04 Apr 2026","staff":"Kishore Reddy N","student":"Bolishetty Ruchira","gender":"Female","accom":"Day Scholar","course":"Excelor - N","fee1":97000,"fee2":107000,"tele":"Akshitha"},{"date":"01 Apr 2026","staff":"Sudhakar B","student":"Cherka Dhanush","gender":"Male","accom":"Residential","course":"Excelor - N","fee1":180000,"fee2":200000,"tele":"Rajya Lakshmi"},{"date":"01 Apr 2026","staff":"Kishore Reddy N","student":"Burra Sai Charanya","gender":"Male","accom":"Day Scholar","course":"Charka Plus","fee1":94000,"fee2":104000,"tele":"Akshitha"},{"date":"01 Apr 2026","staff":"Kishore Reddy N","student":"Uappunuthula Nishika","gender":"Female","accom":"Day Scholar","course":"Charka Plus","fee1":94000,"fee2":104000,"tele":"Akshitha"},{"date":"31 Mar 2026","staff":"Kishore Reddy N","student":"Pabba Karthik Goud","gender":"Male","accom":"Residential","course":"Excelor - N","fee1":170000,"fee2":190000,"tele":"Ch Shivaleela"},{"date":"26 Mar 2026","staff":"Kishore Reddy N","student":"Sama Akshay Vardhan Reddy","gender":"Male","accom":"Semi Residential","course":"Excelor - N","fee1":130000,"fee2":145000,"tele":"Akshitha"},{"date":"25 Mar 2026","staff":"Kishore Reddy N","student":"Nuthikanti Sushanth Reddy","gender":"Male","accom":"Residential","course":"Excelor-I","fee1":190000,"fee2":210000,"tele":"Akshitha"},{"date":"25 Mar 2026","staff":"Vijay Kumar Vemula","student":"Sampeta Amrutha Sri","gender":"Female","accom":"Residential","course":"Excelor - N","fee1":170000,"fee2":190000,"tele":"Anusha"},{"date":"23 Mar 2026","staff":"Kishore Reddy N","student":"Gopagalla Kamala Harini","gender":"Female","accom":"Residential","course":"Charka Plus","fee1":170000,"fee2":190000,"tele":"Akshitha"},{"date":"23 Mar 2026","staff":"Kishore Reddy N","student":"Kontala Vishal Reddy","gender":"Male","accom":"Semi Residential","course":"Excelor-I","fee1":130000,"fee2":145000,"tele":"Akshitha"},{"date":"22 Mar 2026","staff":"Nagaiah Ch","student":"Bolla Sai Nandan","gender":"Male","accom":"Residential","course":"Excelor-I","fee1":140000,"fee2":160000,"tele":"Neelima"},{"date":"18 Mar 2026","staff":"Srinivas S","student":"Gopagalla Keerthana","gender":"Female","accom":"Day Scholar","course":"Charka Plus","fee1":109000,"fee2":0,"tele":"Pooja"},{"date":"18 Mar 2026","staff":"Kishore Reddy N","student":"Ankamgari Karunya","gender":"Female","accom":"Day Scholar","course":"Charka Plus","fee1":94000,"fee2":104000,"tele":"Akshitha"},{"date":"18 Mar 2026","staff":"Kishore Reddy N","student":"Keesari Abhnav Reddy","gender":"Male","accom":"Residential","course":"Excelor - N","fee1":170500,"fee2":190000,"tele":"Akshitha"},{"date":"16 Mar 2026","staff":"Kishore Reddy N","student":"Mudavath Mamatha","gender":"Female","accom":"Residential","course":"Excelor - N","fee1":175000,"fee2":190000,"tele":"Akshitha"},{"date":"16 Mar 2026","staff":"Kishore Reddy N","student":"Sanga Manikanta","gender":"Male","accom":"Residential","course":"Excelor - N","fee1":180000,"fee2":200000,"tele":"Akshitha"},{"date":"15 Mar 2026","staff":"Kishore Reddy N","student":"Jangidi Siddi Vardhan","gender":"Male","accom":"Semi Residential","course":"Excelor-I","fee1":137000,"fee2":152000,"tele":"Akshitha"},{"date":"12 Mar 2026","staff":"Kishore Reddy N","student":"Cheguri Nishtha","gender":"Female","accom":"Day Scholar","course":"Charka Plus","fee1":94000,"fee2":104000,"tele":"Akshitha"},{"date":"10 Mar 2026","staff":"Kishore Reddy N","student":"Nandyala Ritesh Reddy","gender":"Male","accom":"Day Scholar","course":"Excelor - N","fee1":72000,"fee2":82000,"tele":"Akshitha"},{"date":"10 Mar 2026","staff":"Kishore Reddy N","student":"Kore Harika","gender":"Female","accom":"Day Scholar","course":"Charka Plus","fee1":99000,"fee2":109000,"tele":"Ch Shivaleela"},{"date":"08 Mar 2026","staff":"Vijay Kumar Vemula","student":"K. Apurva","gender":"Female","accom":"Residential","course":"Excelor - N","fee1":165000,"fee2":185000,"tele":"Anusha"},{"date":"08 Mar 2026","staff":"Kishore Reddy N","student":"Abhishek","gender":"Male","accom":"Residential","course":"Excelor - N","fee1":180000,"fee2":200000,"tele":"Akshitha"},{"date":"06 Mar 2026","staff":"Kishore Reddy N","student":"Gopi Ram Charan","gender":"Male","accom":"Residential","course":"Excelor - N","fee1":170500,"fee2":190000,"tele":"Akshitha"},{"date":"06 Mar 2026","staff":"Kishore Reddy N","student":"Gopi Sai Charan","gender":"Male","accom":"Residential","course":"Excelor - N","fee1":170500,"fee2":190000,"tele":"Akshitha"},{"date":"22 Feb 2026","staff":"Sathish Munavath","student":"Sai Anirudh Reddy","gender":"Male","accom":"Residential","course":"Excelor-I","fee1":185000,"fee2":205000,"tele":"Ch Shivaleela"},{"date":"22 Feb 2026","staff":"Kishore Reddy N","student":"Amboji Srivalli Yadav","gender":"Female","accom":"Residential","course":"Excelor-I","fee1":200000,"fee2":220000,"tele":"Akshitha"},{"date":"19 Feb 2026","staff":"Kishore Reddy N","student":"B. Mokshanna","gender":"Female","accom":"Residential","course":"Excelor-I","fee1":190000,"fee2":210000,"tele":"Ch Shivaleela"},{"date":"19 Feb 2026","staff":"Vijay Kumar Vemula","student":"Bathini Namratha","gender":"Female","accom":"Residential","course":"Excelor - N","fee1":180000,"fee2":200000,"tele":"Anusha"},{"date":"15 Feb 2026","staff":"Nagaiah Ch","student":"Renabothu Yogitha","gender":"Female","accom":"Residential","course":"Excelor - N","fee1":180000,"fee2":200000,"tele":"Neelima"},{"date":"14 Feb 2026","staff":"Sudhakar B","student":"M. Sunandha","gender":"Female","accom":"Residential","course":"Excelor - N","fee1":170000,"fee2":190000,"tele":"Tejaswini"},{"date":"11 Feb 2026","staff":"Sudhakar B","student":"R. Akanksha","gender":"Female","accom":"Residential","course":"Excelor - N","fee1":170000,"fee2":190000,"tele":"Tejaswini"},{"date":"11 Feb 2026","staff":"Sudhakar B","student":"Kavali Venkatesh","gender":"Male","accom":"Residential","course":"Excelor - N","fee1":170000,"fee2":190000,"tele":"Tejaswini"},{"date":"11 Feb 2026","staff":"Sudhakar B","student":"R. Manisha","gender":"Female","accom":"Residential","course":"Excelor - N","fee1":170000,"fee2":190000,"tele":"Tejaswini"},{"date":"08 Feb 2026","staff":"Bhagath S","student":"K. Karthikeya","gender":"Male","accom":"Residential","course":"Excelor-I","fee1":190000,"fee2":210000,"tele":"Sucharitha"},{"date":"08 Feb 2026","staff":"Vijay Kumar Vemula","student":"Arruri Lasya","gender":"Female","accom":"Residential","course":"Excelor - N","fee1":170000,"fee2":190000,"tele":"Anusha"},{"date":"08 Feb 2026","staff":"Kishore Reddy N","student":"Bheem Reddy Anish Reddy","gender":"Male","accom":"Day Scholar","course":"Excelor - N","fee1":97000,"fee2":107000,"tele":"Akshitha"},{"date":"06 Feb 2026","staff":"Srinivas S","student":"M. Nihal Goud","gender":"Male","accom":"Residential","course":"Excelor-I","fee1":200000,"fee2":190000,"tele":"Pooja"},{"date":"06 Feb 2026","staff":"Kishore Reddy N","student":"Theegala Yoshna Reddy","gender":"Female","accom":"Residential","course":"Excelor-I","fee1":190000,"fee2":210000,"tele":"Akshitha"},{"date":"23 Jan 2026","staff":"Kishore Reddy N","student":"Madani Lakshmi Manaswini","gender":"Female","accom":"Day Scholar","course":"Charka Plus","fee1":89000,"fee2":99000,"tele":"Akshitha"},{"date":"23 Jan 2026","staff":"Srinivas S","student":"D. Lakshmi Pranavi","gender":"Female","accom":"Residential","course":"Excelor-I","fee1":190000,"fee2":175000,"tele":"Pooja"},{"date":"22 Jan 2026","staff":"Kishore Reddy N","student":"Gunnala Manideep","gender":"Male","accom":"Residential","course":"Excelor - N","fee1":180000,"fee2":200000,"tele":"Ch Shivaleela"},{"date":"21 Jan 2026","staff":"Nagaraju Bandela","student":"Kunche Rishi Patel","gender":"Male","accom":"Semi Residential","course":"Elite-40","fee1":165000,"fee2":185000,"tele":"Neelima"},{"date":"20 Jan 2026","staff":"Srinivas S","student":"D. Mythra Varun Goud","gender":"Male","accom":"Residential","course":"Charka Plus","fee1":178000,"fee2":188000,"tele":"Pooja"},{"date":"30 Dec 2025","staff":"Sudhakar B","student":"Kn Mohan","gender":"Male","accom":"Residential","course":"Charka Plus","fee1":168000,"fee2":188000,"tele":"Tejaswini"},{"date":"30 Dec 2025","staff":"Sudhakar B","student":"Y Harsha Vardhan Reddy","gender":"Male","accom":"Residential","course":"Charka Plus","fee1":168000,"fee2":188000,"tele":"Tejaswini"},{"date":"26 Dec 2025","staff":"Bhagath S","student":"Akinapalli Sharmista Ashyath","gender":"Female","accom":"Residential","course":"Excelor-I","fee1":185000,"fee2":195000,"tele":"Sucharitha"},{"date":"21 Dec 2025","staff":"Sudhakar B","student":"Goje Srisha","gender":"Female","accom":"Residential","course":"Excelor-I","fee1":180000,"fee2":200000,"tele":"Tejaswini"},{"date":"17 Dec 2025","staff":"Sudhakar B","student":"V. Manasvini","gender":"Female","accom":"Day Scholar","course":"Excelor-I","fee1":112000,"fee2":122000,"tele":"Tejaswini"},{"date":"15 Dec 2025","staff":"Kishore Reddy N","student":"Gangula Jashwanth Reddy","gender":"Male","accom":"Residential","course":"Excelor - N","fee1":180000,"fee2":200000,"tele":"Akshitha"},{"date":"15 Dec 2025","staff":"Kishore Reddy N","student":"Nandyala Avanish Reddy","gender":"Male","accom":"Day Scholar","course":"Excelor-I","fee1":72000,"fee2":82000,"tele":"Akshitha"},{"date":"14 Dec 2025","staff":"Srinivas S","student":"Konda Aakash","gender":"Male","accom":"Day Scholar","course":"Excelor-I","fee1":72000,"fee2":200000,"tele":"Pooja"},{"date":"13 Dec 2025","staff":"Kishore Reddy N","student":"Vallapoju Hari Hara","gender":"Male","accom":"Day Scholar","course":"Excelor-I","fee1":110000,"fee2":112000,"tele":"Akshitha"},{"date":"09 Dec 2025","staff":"Srinivas S","student":"Bandari Ravinder","gender":"Male","accom":"Residential","course":"Excelor - N","fee1":170000,"fee2":190000,"tele":"Pooja"},{"date":"12 Nov 2025","staff":"Srinivas S","student":"Neerati Charan Teja","gender":"Male","accom":"Residential","course":"Excelor - N","fee1":180000,"fee2":190000,"tele":"Pooja"},{"date":"22 Oct 2025","staff":"Srinivas S","student":"Vaddanam Shashank","gender":"Male","accom":"Residential","course":"Excelor-I","fee1":180000,"fee2":190000,"tele":"Pooja"}];
+
+// ── STATE ─────────────────────────────────────────────────────────────────
+let allData=FALLBACK, filters={month:'all',gender:'all',accom:'all'};
+let srtKey='date',srtDir=-1,curPage=1;
+const PER_PAGE=15;
+let trendCI=null,feeCI=null;
+
+// ── HELPERS ───────────────────────────────────────────────────────────────
+const $=id=>document.getElementById(id);
+const txt=(id,v)=>{const e=$(id);if(e)e.textContent=v};
+function fmtINR(n){if(n>=1e7)return '₹'+(n/1e7).toFixed(2)+'Cr';if(n>=1e5)return '₹'+(n/1e5).toFixed(2)+'L';return '₹'+n.toLocaleString('en-IN');}
+function fmtAmt(n){return n?'₹'+Math.round(n).toLocaleString('en-IN'):'—';}
+function pct(a,b){return b?(a/b*100).toFixed(1)+'%':'—';}
+function cnt(arr,k,v){return arr.filter(r=>r[k]===v).length;}
+function avgF(arr,k){const vs=arr.map(r=>r[k]).filter(v=>v>0);return vs.length?vs.reduce((a,b)=>a+b,0)/vs.length:0;}
+function sumF(arr,k){return arr.reduce((a,r)=>a+(r[k]||0),0);}
+
+function getFiltered(){
+  return allData.filter(r=>{
+    if(filters.month!=='all'){
+      const d=new Date(r.date);
+      const mStr=d.toLocaleString('default',{month:'short',year:'numeric'});
+      if(mStr!==filters.month) return false;
+    }
+    if(filters.gender!=='all'&&r.gender!==filters.gender)return false;
+    if(filters.accom!=='all'&&r.accom!==filters.accom)return false;
+    return true;
+  });
+}
+
+function setFilter(el,key,val){
+  // deactivate chips in same segment
+  const all=Array.from(el.parentElement.children);
+  const myIdx=all.indexOf(el);
+  let i=myIdx-1;
+  while(i>=0&&all[i].classList.contains('chip')){all[i].classList.remove('active');i--;}
+  i=myIdx+1;
+  while(i<all.length&&all[i].classList.contains('chip')){all[i].classList.remove('active');i++;}
+  el.classList.toggle('active',true);
+  // make only clicked chip active in its run
+  i=myIdx-1;
+  while(i>=0&&all[i].classList.contains('chip')){all[i].classList.remove('active');i--;}
+  filters[key]=val;
+  renderAll();
+}
+
+// ── RENDER ALL ────────────────────────────────────────────────────────────
+function renderAll(){
+  const d=getFiltered();
+  renderKPIs(d);renderTotalFunnel(d);renderAllStaffFunnels();
+  renderAccomGender(d);renderCourseBars(d);
+  renderPivot(d);renderTrend();renderStaff(d);renderTele(d);renderFees(d);renderTable();
+}
+
+// ── KPIs ──────────────────────────────────────────────────────────────────
+function renderKPIs(d){
+  txt('k-adm', d.length);
+  txt('k-f1', fmtINR(sumF(d,'fee1')));
+  txt('k-f2', fmtINR(sumF(d,'fee2')));
+  txt('k-fv', TOTAL_FV_LIVE.toLocaleString());
+  txt('k-cv', TOTAL_CV_LIVE.toLocaleString());
+  txt('k-fc', pct(TOTAL_CV_LIVE, TOTAL_FV_LIVE));
+  txt('k-ca', pct(d.length, TOTAL_CV_LIVE));
+  const kfcs = document.getElementById('k-fc')?.closest('.kc')?.querySelector('.ks');
+  if(kfcs) kfcs.textContent = TOTAL_CV_LIVE + ' of ' + TOTAL_FV_LIVE.toLocaleString() + ' visits';
+  const kcas = document.getElementById('k-ca')?.closest('.kc')?.querySelector('.ks');
+  if(kcas) kcas.textContent = d.length + ' of ' + TOTAL_CV_LIVE + ' campus visits';
+}
+
+// ── FUNNEL HTML BUILDER ───────────────────────────────────────────────────
+function buildFunnelHTML(fv, cv, adm) {
+  const safeD = (a,b) => b>0 ? (a/b).toFixed(1) : '—';
+  const safePct = (a,b) => b>0 ? ((a/b)*100).toFixed(1)+'%' : '—';
+
+  const W=300, FUNNEL_W=120, FX=6, LX=FX+FUNNEL_W+16, FCX=FX+FUNNEL_W/2;
+
+  const lh = n => Math.max(68, Math.round(Math.log10(n+1)*54));
+  const h1=lh(fv), h2=lh(cv), h3=lh(adm);
+  const CONN=20;
+
+  const fw1=FUNNEL_W;
+  const fw2=Math.max(40, Math.round(fw1*Math.min(0.9, Math.max(0.22, fv>0?cv/fv:0.5))));
+  const fw3=Math.max(18, Math.round(fw2*Math.min(0.9, Math.max(0.16, cv>0?adm/cv:0.3))));
+
+  const y1t=0, y1b=h1;
+  const yc1t=y1b, yc1b=y1b+CONN;
+  const y2t=yc1b, y2b=y2t+h2;
+  const yc2t=y2b, yc2b=y2b+CONN;
+  const y3t=yc2b, y3b=y3t+h3;
+  const totalH=y3b+4;
+
+  const trap=(tw,bw,ty,by,fill)=>{
+    const tl=FCX-tw/2,tr=FCX+tw/2,bl=FCX-bw/2,br=FCX+bw/2;
+    return `<polygon points="${tl},${ty} ${tr},${ty} ${br},${by} ${bl},${by}" fill="${fill}" stroke="none"/>`;
+  };
+
+  const uid = Math.random().toString(36).slice(2,7);
+
+  const lbl=(midY, h, bigN, name, sub, nc, sc, xc)=>{
+    const sp=Math.min(17, Math.max(12, h/5));
+    const ny=midY-sp*0.4, ky=ny+sp, sy=ky+sp*0.85;
+    const fs=Math.min(19,Math.max(13,h/4.2));
+    let s=`<text x="${LX}" y="${ny}" font-size="${fs}" font-weight="600" font-family="monospace" fill="${nc}">${Number(bigN).toLocaleString()}</text>`;
+    if(h>=52) s+=`<text x="${LX}" y="${ky}" font-size="10" font-weight="500" fill="${sc}">${name}</text>`;
+    if(h>=68) s+=`<text x="${LX}" y="${sy}" font-size="9" fill="${xc}">${sub}</text>`;
+    return s;
+  };
+
+  const guide=(y,fromX,col)=>`<line x1="${fromX}" y1="${y}" x2="${LX-4}" y2="${y}" stroke="${col}" stroke-width="0.5" stroke-dasharray="3,2"/>`;
+
+  const connTxt=(midY,txt,col)=>`<text x="${LX}" y="${midY+4}" font-size="9" font-weight="500" fill="${col}">${txt}</text>`;
+
+  let s=`<defs>
+    <linearGradient id="f1_${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1A5FA8"/><stop offset="100%" stop-color="#2E86D4"/></linearGradient>
+    <linearGradient id="fc1_${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#2E86D4"/><stop offset="100%" stop-color="#534AB7"/></linearGradient>
+    <linearGradient id="f2_${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#534AB7"/><stop offset="100%" stop-color="#7066D0"/></linearGradient>
+    <linearGradient id="fc2_${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7066D0"/><stop offset="100%" stop-color="#0A8A66"/></linearGradient>
+    <linearGradient id="f3_${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0A8A66"/><stop offset="100%" stop-color="#12B080"/></linearGradient>
+  </defs>`;
+
+  // Stage 1
+  s += trap(fw1,fw2,y1t,y1b,`url(#f1_${uid})`);
+  s += guide(y1t+h1/2, FCX+fw1/2, '#378ADD');
+  s += lbl(y1t+h1/2, h1, fv, 'Field Visits', '100% — starting point', '#0C447C','#185FA5','#888780');
+
+  // Connector 1
+  s += trap(fw2,fw2,yc1t,yc1b,`url(#fc1_${uid})`);
+  s += connTxt((yc1t+yc1b)/2, `↓ ${safePct(cv,fv)} · ${safeD(fv,cv)} FV per CV`, '#534AB7');
+
+  // Stage 2
+  s += trap(fw2,fw3,y2t,y2b,`url(#f2_${uid})`);
+  s += guide(y2t+h2/2, FCX+fw2/2, '#7F77DD');
+  s += lbl(y2t+h2/2, h2, cv, 'Campus Visits', `${safePct(cv,fv)} of field visits`, '#26215C','#534AB7','#888780');
+
+  // Connector 2
+  s += trap(fw3,fw3,yc2t,yc2b,`url(#fc2_${uid})`);
+  s += connTxt((yc2t+yc2b)/2, `↓ ${safePct(adm,cv)} · ${safeD(cv,adm)} CV per adm`, '#0F6E56');
+
+  // Stage 3
+  const fw3b=Math.max(10,Math.round(fw3*0.65));
+  s += trap(fw3,fw3b,y3t,y3b,`url(#f3_${uid})`);
+  s += guide(y3t+h3/2, FCX+fw3/2, '#1D9E75');
+  s += lbl(y3t+h3/2, h3, adm, 'Admissions', `${safePct(adm,fv)} of FV · ${safeD(fv,adm)} FV/adm`, '#085041','#0F6E56','#888780');
+
+  return `<svg viewBox="0 0 ${W} ${totalH}" width="100%" style="display:block">${s}</svg>`;
+}
+
+// ── TOTAL FUNNEL (left panel) ──────────────────────────────────────────────
+function renderTotalFunnel(d){
+  const el=$('funnel-total'); if(!el) return;
+  el.innerHTML=buildFunnelHTML(TOTAL_FV_LIVE, TOTAL_CV_LIVE, d.length);
+}
+
+// ── ALL-STAFF FUNNELS (right panel) ───────────────────────────────────────
+const STAFF_LIST=['Kishore Reddy N','Srinivas S','Sudhakar B','Vijay Kumar Vemula','Nagaiah Ch','Nagaraju Bandela','Sathish Munavath'];
+const MONTH_OPTIONS=[
+  {val:'all',lbl:'All'},{val:'Oct 2025',lbl:'Oct'},{val:'Nov 2025',lbl:'Nov'},
+  {val:'Dec 2025',lbl:'Dec'},{val:'Jan 2026',lbl:'Jan'},{val:'Feb 2026',lbl:'Feb'},
+  {val:'Mar 2026',lbl:'Mar'},{val:'Apr 2026',lbl:'Apr'}
+];
+
+function renderAllStaffFunnels(){
+  const container=$('all-staff-funnels'); if(!container) return;
+  container.innerHTML=STAFF_LIST.map((s,i)=>{
+    const chips=MONTH_OPTIONS.map(o=>{
+      const isAll=o.val==='all';
+      const activeStyle=isAll?'background:#EEEDFE;border-color:#7F77DD;color:#3C3489;font-weight:500;':'background:var(--surface);color:var(--muted);border-color:var(--border);';
+      return `<span onclick="setStaffMonth(${i},'${s}','${o.val}',this)" style="font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid;cursor:pointer;white-space:nowrap;display:inline-block;${activeStyle}">${o.lbl}</span>`;
+    }).join('');
+
+    // Target panel
+    const target = TARGETS[s]||0;
+    const current = allData.filter(r=>r.staff===s).length;
+    const pending = Math.max(0, target - current);
+    const done = Math.min(current, target);
+    const pct = target>0 ? Math.round(done/target*100) : 100;
+    const fvRate = STAFF_DATA[s]?.fv>0 ? STAFF_DATA[s].cv/STAFF_DATA[s].fv : 0;
+    const cvRate = STAFF_DATA[s]?.cv>0 ? current/STAFF_DATA[s].cv : 0;
+    const cvNeeded = cvRate>0 ? Math.ceil(pending/cvRate) : '—';
+    const fvNeeded = (fvRate>0 && cvNeeded!=='—') ? Math.ceil(cvNeeded/fvRate) : '—';
+    const cvPerDay = (cvNeeded!=='—') ? (cvNeeded/WORKING_DAYS_LEFT).toFixed(1) : '—';
+    const fvPerDay = (fvNeeded!=='—') ? (fvNeeded/WORKING_DAYS_LEFT).toFixed(1) : '—';
+
+    const statusColor = pct>=100?'#0A7A5A': pct>=60?'#854F0B':'#993C1D';
+    const statusBg    = pct>=100?'#E1F5EE': pct>=60?'#FAEEDA':'#FAECE7';
+    const barColor    = pct>=100?'#1D9E75': pct>=60?'#EF9F27':'#D85A30';
+
+    const targetHTML = `<div style="margin-top:10px;padding:10px 12px;background:${statusBg};border-radius:8px;border:0.5px solid ${barColor}44">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:${statusColor}">Target by ${DEADLINE_LABEL}</span>
+        <span style="font-size:11px;font-weight:500;color:${statusColor}">${done} / ${target} &nbsp;(${pct}%)</span>
+      </div>
+      <div style="height:6px;background:rgba(0,0,0,.08);border-radius:3px;overflow:hidden;margin-bottom:8px">
+        <div style="height:100%;width:${Math.min(100,pct)}%;background:${barColor};border-radius:3px;transition:width .4s"></div>
+      </div>
+      ${pending>0 ? `
+      <div style="font-size:10px;font-weight:500;color:${statusColor};margin-bottom:5px">Needs ${pending} more admissions — visits required:</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <div style="background:rgba(255,255,255,.6);border-radius:6px;padding:7px 9px;text-align:center">
+          <div style="font-size:16px;font-weight:600;color:#0C447C;font-family:monospace">${cvNeeded}</div>
+          <div style="font-size:9px;color:#185FA5;font-weight:500">campus visits total</div>
+          <div style="font-size:9px;color:#888780;margin-top:1px">${cvPerDay}/working day</div>
+        </div>
+        <div style="background:rgba(255,255,255,.6);border-radius:6px;padding:7px 9px;text-align:center">
+          <div style="font-size:16px;font-weight:600;color:#26215C;font-family:monospace">${fvNeeded}</div>
+          <div style="font-size:9px;color:#534AB7;font-weight:500">field visits total</div>
+          <div style="font-size:9px;color:#888780;margin-top:1px">${fvPerDay}/working day</div>
+        </div>
+      </div>` :
+      `<div style="font-size:11px;font-weight:500;color:#0A7A5A;text-align:center;padding:4px 0">Target achieved!</div>`}
+    </div>`;
+
+    return `<div style="border:0.5px solid var(--border);border-radius:10px;padding:12px;background:var(--gy100)">
+      <div style="display:flex;align-items:center;gap:7px;margin-bottom:8px">
+        <div style="width:20px;height:20px;border-radius:50%;background:#EEEDFE;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;color:#3C3489;flex-shrink:0">${i+1}</div>
+        <span style="font-size:12px;font-weight:500;color:var(--text)">${s}</span>
+      </div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px" id="sf-chips-${i}">${chips}</div>
+      <div id="sf-funnel-${i}"></div>
+      ${targetHTML}
+    </div>`;
+  }).join('');
+  STAFF_LIST.forEach((s,i)=>refreshOneFunnel(i,s,'all'));
+}
+
+function setStaffMonth(i,s,mon,el){
+  const chipsEl=$(`sf-chips-${i}`); if(!chipsEl) return;
+  chipsEl.querySelectorAll('.sf-chip').forEach(c=>{
+    c.style.background='var(--surface)';
+    c.style.borderColor='var(--border)';
+    c.style.color='var(--muted)';
+    c.style.fontWeight='400';
+  });
+  el.style.background='#EEEDFE';
+  el.style.borderColor='#7F77DD';
+  el.style.color='#3C3489';
+  el.style.fontWeight='500';
+  refreshOneFunnel(i,s,mon);
+}
+
+function refreshOneFunnel(i,s,mon){
+  const el=$(`sf-funnel-${i}`); if(!el) return;
+  let fv,cv,adm;
+  if(!mon||mon==='all'){
+    fv=STAFF_DATA[s]?.fv||0;
+    cv=STAFF_DATA[s]?.cv||0;
+    adm=allData.filter(r=>r.staff===s).length;
+  } else {
+    const mRow=(STAFF_MONTHLY[s]||[]).find(r=>r.m===mon)||{fv:0,cv:0};
+    fv=mRow.fv; cv=mRow.cv;
+    adm=allData.filter(r=>{
+      if(r.staff!==s) return false;
+      const dt=new Date(r.date);
+      const ml=dt.toLocaleString('default',{month:'short',year:'numeric'});
+      return ml===mon;
+    }).length;
+  }
+  el.innerHTML=buildFunnelHTML(fv,cv,adm);
+}
+
+// ── ACCOM / GENDER BARS ───────────────────────────────────────────────────
+function renderAccomGender(d){
+  const tot=d.length||1;
+  const r=cnt(d,'accom','Residential'),dy=cnt(d,'accom','Day Scholar'),sm=cnt(d,'accom','Semi Residential');
+  $('accom-bar').innerHTML=`<div style="width:${r/tot*100}%;background:#1D9E75"></div><div style="width:${dy/tot*100}%;background:#EF9F27"></div><div style="width:${sm/tot*100}%;background:#D85A30"></div>`;
+  $('accom-leg').innerHTML=`<div class="li"><div class="ld" style="background:#1D9E75"></div>Residential — ${r} (${pct(r,tot)})</div><div class="li"><div class="ld" style="background:#EF9F27"></div>Day Scholar — ${dy} (${pct(dy,tot)})</div><div class="li"><div class="ld" style="background:#D85A30"></div>Semi Residential — ${sm} (${pct(sm,tot)})</div>`;
+  const m=cnt(d,'gender','Male'),f=cnt(d,'gender','Female');
+  $('gender-bar').innerHTML=`<div style="width:${m/tot*100}%;background:#378ADD"></div><div style="width:${f/tot*100}%;background:#ED93B1"></div>`;
+  $('gender-leg').innerHTML=`<div class="li"><div class="ld" style="background:#378ADD"></div>Male — ${m} (${pct(m,tot)})</div><div class="li"><div class="ld" style="background:#ED93B1"></div>Female — ${f} (${pct(f,tot)})</div>`;
+}
+
+// ── COURSE BARS ───────────────────────────────────────────────────────────
+function renderCourseBars(d){
+  const cs=['Excelor - N','Excelor-I','Charka Plus','Elite-40'];
+  const cols=['#534AB7','#7F77DD','#AFA9EC','#CECBF6'];
+  const ns=cs.map(c=>cnt(d,'course',c));
+  const mx=Math.max(...ns)||1;
+  $('course-bars').innerHTML=cs.map((c,i)=>`<div class="br"><div class="bl2" title="${c}">${c}</div><div class="bt"><div class="bf" style="width:${ns[i]/mx*100}%;background:${cols[i]}"></div></div><div class="bn2">${ns[i]}</div></div>`).join('');
+}
+
+// ── PIVOT TABLE ───────────────────────────────────────────────────────────
+function renderPivot(d){
+  const cs=['Excelor - N','Excelor-I','Charka Plus','Elite-40'];
+  let html=`<thead><tr>
+    <th class="tl h-sub" rowspan="2">Course</th>
+    <th colspan="3" class="h-resi">Residential</th>
+    <th colspan="3" class="h-day">Day Scholar</th>
+    <th colspan="3" class="h-semi">Semi Residential</th>
+    <th colspan="3" class="h-tot">Total</th>
+  </tr><tr>
+    <th class="h-resi">F</th><th class="h-resi">M</th><th class="h-resi">Sub</th>
+    <th class="h-day">F</th><th class="h-day">M</th><th class="h-day">Sub</th>
+    <th class="h-semi">F</th><th class="h-semi">M</th><th class="h-semi">Sub</th>
+    <th class="h-tot">F</th><th class="h-tot">M</th><th class="h-tot">Total</th>
+  </tr></thead><tbody>`;
+  let g={rf:0,rm:0,rs:0,df:0,dm:0,ds:0,sf:0,sm:0,ss:0,tf:0,tm:0,t:0};
+  cs.forEach(c=>{
+    const cd=d.filter(r=>r.course===c);
+    const rf=cnt(cd.filter(r=>r.accom==='Residential'),'gender','Female');
+    const rm=cnt(cd.filter(r=>r.accom==='Residential'),'gender','Male');
+    const df=cnt(cd.filter(r=>r.accom==='Day Scholar'),'gender','Female');
+    const dm=cnt(cd.filter(r=>r.accom==='Day Scholar'),'gender','Male');
+    const sf=cnt(cd.filter(r=>r.accom==='Semi Residential'),'gender','Female');
+    const sm=cnt(cd.filter(r=>r.accom==='Semi Residential'),'gender','Male');
+    const rs=rf+rm,ds=df+dm,ss=sf+sm,tf=rf+df+sf,tm=rm+dm+sm,tot=cd.length;
+    g.rf+=rf;g.rm+=rm;g.rs+=rs;g.df+=df;g.dm+=dm;g.ds+=ds;g.sf+=sf;g.sm+=sm;g.ss+=ss;g.tf+=tf;g.tm+=tm;g.t+=tot;
+    html+=`<tr>
+      <td class="tl">${c}</td>
+      <td><span class="pv-f">${rf}</span></td><td><span class="pv-m">${rm}</span></td><td><span class="pv-r">${rs}</span></td>
+      <td><span class="pv-f">${df}</span></td><td><span class="pv-m">${dm}</span></td><td><span class="pv-d">${ds}</span></td>
+      <td><span class="pv-f">${sf}</span></td><td><span class="pv-m">${sm}</span></td><td><span class="pv-s">${ss}</span></td>
+      <td><span class="pv-f">${tf}</span></td><td><span class="pv-m">${tm}</span></td><td><span class="pv-t">${tot}</span></td>
+    </tr>`;
+  });
+  html+=`<tr class="ptr">
+    <td class="tl">Grand total</td>
+    <td><span class="pv-f">${g.rf}</span></td><td><span class="pv-m">${g.rm}</span></td><td><span class="pv-r">${g.rs}</span></td>
+    <td><span class="pv-f">${g.df}</span></td><td><span class="pv-m">${g.dm}</span></td><td><span class="pv-d">${g.ds}</span></td>
+    <td><span class="pv-f">${g.sf}</span></td><td><span class="pv-m">${g.sm}</span></td><td><span class="pv-s">${g.ss}</span></td>
+    <td><span class="pv-f">${g.tf}</span></td><td><span class="pv-m">${g.tm}</span></td><td><span class="pv-t">${g.t}</span></td>
+  </tr></tbody>`;
+  $('pivot-tbl').innerHTML=`<table class="pvib">${html}</table>`;
+}
+
+// ── TREND CHART ───────────────────────────────────────────────────────────
+function renderTrend(){
+  const ctx=$('trend-chart');
+  if(trendCI)trendCI.destroy();
+  const src = MONTHLY_LIVE.length>0 ? MONTHLY_LIVE : MONTHLY;
+  trendCI=new Chart(ctx,{type:'line',data:{labels:src.map(r=>r.m),datasets:[
+    {label:'Visits',data:src.map(r=>(r.fv||0)+(r.cv||0)),borderColor:'#534AB7',borderWidth:2,pointRadius:3,pointBackgroundColor:'#534AB7',tension:0.4,fill:false,yAxisID:'y'},
+    {label:'Admissions',data:src.map(r=>r.adm||0),borderColor:'#1D9E75',borderWidth:2,borderDash:[6,4],pointRadius:3,pointBackgroundColor:'#1D9E75',pointStyle:'triangle',tension:0.4,fill:false,yAxisID:'y2'}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false}},
+    scales:{x:{ticks:{font:{size:10},color:'#888780',autoSkip:false,maxRotation:0},grid:{display:false}},
+      y:{position:'left',ticks:{font:{size:10},color:'#534AB7'},grid:{color:'rgba(136,135,128,0.07)'},title:{display:true,text:'Visits',font:{size:9},color:'#534AB7'}},
+      y2:{position:'right',ticks:{font:{size:10},color:'#1D9E75'},grid:{display:false},title:{display:true,text:'Admissions',font:{size:9},color:'#1D9E75'}}}}});
+}
+
+// ── STAFF TAB ─────────────────────────────────────────────────────────────
+function renderStaff(d){
+  // Only staff with field visits
+  const staffList=Object.keys(STAFF_DATA);
+  const admMap={};
+  d.forEach(r=>{if(staffList.includes(r.staff))admMap[r.staff]=(admMap[r.staff]||0)+1;});
+  const rows=staffList.filter(s=>admMap[s]>0).map(s=>({
+    s,fv:STAFF_DATA[s].fv,cv:STAFF_DATA[s].cv,adm:admMap[s]||0,
+    fc:(STAFF_DATA[s].cv/STAFF_DATA[s].fv*100).toFixed(1),
+    ca:((admMap[s]||0)/STAFF_DATA[s].cv*100).toFixed(1)
+  })).sort((a,b)=>b.adm-a.adm);
+
+  // 1. Funnel rows (grouped stacked bars for fv/cv/adm)
+  const maxFV=Math.max(...rows.map(r=>r.fv));
+  $('staff-funnel-rows').innerHTML=rows.map(r=>`
+    <div style="margin-bottom:10px">
+      <div style="font-size:11px;font-weight:500;color:var(--text);margin-bottom:4px">${r.s}</div>
+      <div class="br" style="margin-bottom:3px"><div class="bl2" style="font-size:10px;color:var(--muted)">Field visits</div><div class="bt"><div class="bf" style="width:${r.fv/maxFV*100}%;background:var(--bl400)"></div></div><div class="bn2">${r.fv}</div></div>
+      <div class="br" style="margin-bottom:3px"><div class="bl2" style="font-size:10px;color:var(--muted)">Campus visits</div><div class="bt"><div class="bf" style="width:${r.cv/maxFV*100}%;background:var(--pu400)"></div></div><div class="bn2">${r.cv}</div></div>
+      <div class="br" style="margin-bottom:0"><div class="bl2" style="font-size:10px;color:var(--muted)">Admissions</div><div class="bt"><div class="bf" style="width:${Math.max(r.adm/maxFV*100,1)}%;background:var(--te400)"></div></div><div class="bn2">${r.adm}</div></div>
+    </div>`).join('<div style="height:1px;background:var(--border);margin:6px 0"></div>');
+
+  // 2. Conversion table — vibrant with heat colours + FV and CV counts
+  const maxFC=Math.max(...rows.map(r=>parseFloat(r.fc)));
+  const maxCA=Math.max(...rows.map(r=>parseFloat(r.ca)));
+  function heatClass(val,max){const p=val/max;return p>=0.6?'heat-h':p>=0.3?'heat-m':'heat-l';}
+  $('staff-conv-tbl').innerHTML=`<table class="conv-tbl"><thead><tr>
+    <th class="tl" style="width:22%">Staff member</th>
+    <th>Adm</th>
+    <th style="background:#E6F1FB;color:#0C447C">Field Visits</th>
+    <th style="background:#EEEDFE;color:#26215C">Campus Visits</th>
+    <th>FV → CV %</th><th>FV per CV</th>
+    <th>CV → Adm %</th><th>CV per Adm</th>
+    <th>FV per Adm</th>
+  </tr></thead><tbody>`+
+    rows.map((r,i)=>{
+      const fvPerCv=(r.fv/r.cv).toFixed(1);
+      const cvPerAdm=(r.cv/r.adm).toFixed(1);
+      const fvPerAdm=(r.fv/r.adm).toFixed(1);
+      return `<tr>
+        <td class="tl"><div class="cv-staff"><div class="cv-rank">${i+1}</div><span class="cv-name">${r.s}</span></div></td>
+        <td><span class="cv-adm">${r.adm}</span></td>
+        <td style="text-align:center"><span style="background:#E6F1FB;color:#0C447C;padding:4px 10px;border-radius:6px;font-size:13px;font-weight:500;display:inline-block">${r.fv.toLocaleString()}</span></td>
+        <td style="text-align:center"><span style="background:#EEEDFE;color:#26215C;padding:4px 10px;border-radius:6px;font-size:13px;font-weight:500;display:inline-block">${r.cv}</span></td>
+        <td><div class="cv-cell"><span class="${heatClass(parseFloat(r.fc),maxFC)} cv-pct">${r.fc}%</span><span class="cv-ratio">${fvPerCv} FV per CV</span></div></td>
+        <td style="font-size:13px;font-weight:500;color:var(--text);text-align:center">${fvPerCv}</td>
+        <td><div class="cv-cell"><span class="${heatClass(parseFloat(r.ca),maxCA)} cv-pct">${r.ca}%</span><span class="cv-ratio">${cvPerAdm} CV per adm</span></div></td>
+        <td style="font-size:13px;font-weight:500;color:var(--text);text-align:center">${cvPerAdm}</td>
+        <td style="font-size:13px;font-weight:500;color:var(--text);text-align:center">${fvPerAdm}</td>
+      </tr>`;
+    }).join('')+`</tbody></table>`;
+
+  // 3. Accommodation stacked bars per staff — with clear count labels
+  const maxAdm=Math.max(...rows.map(r=>r.adm))||1;
+  $('staff-accom-bars').innerHTML=rows.map(r=>{
+    const sd=d.filter(x=>x.staff===r.s);
+    const rv=cnt(sd,'accom','Residential'),dv=cnt(sd,'accom','Day Scholar'),sv=cnt(sd,'accom','Semi Residential');
+    const tot=rv+dv+sv||1;
+    return `<div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <span style="font-size:12px;font-weight:500;color:var(--text)">${r.s}</span>
+        <span style="font-size:11px;color:var(--muted)">${tot} total</span>
+      </div>
+      <div style="display:flex;height:22px;border-radius:5px;overflow:hidden;border:1px solid var(--border)">
+        ${rv>0?`<div style="width:${rv/tot*100}%;background:#1D9E75;display:flex;align-items:center;justify-content:center"><span style="font-size:11px;font-weight:500;color:#fff">${rv}</span></div>`:''}
+        ${dv>0?`<div style="width:${dv/tot*100}%;background:#EF9F27;display:flex;align-items:center;justify-content:center"><span style="font-size:11px;font-weight:500;color:#fff">${dv}</span></div>`:''}
+        ${sv>0?`<div style="width:${sv/tot*100}%;background:#D85A30;display:flex;align-items:center;justify-content:center"><span style="font-size:11px;font-weight:500;color:#fff">${sv}</span></div>`:''}
+      </div>
+      <div style="display:flex;gap:10px;margin-top:4px;flex-wrap:wrap">
+        ${rv>0?`<span style="font-size:10px;color:#0F6E56">Residential: ${rv}</span>`:''}
+        ${dv>0?`<span style="font-size:10px;color:#854F0B">Day Scholar: ${dv}</span>`:''}
+        ${sv>0?`<span style="font-size:10px;color:#993C1D">Semi Resi: ${sv}</span>`:''}
+      </div>
+    </div>`;
+  }).join('');
+
+  // 4. Avg fee table — new design: yr1 large, yr2 below, coloured column groups
+  const accoms=['Residential','Day Scholar','Semi Residential'];
+  let tblHtml=`<thead><tr>
+    <th rowspan="2" style="text-align:left;width:32%">Staff member</th>
+    <th rowspan="2" style="text-align:center;width:9%">Adm.</th>
+    <th colspan="2" class="fh-r" style="text-align:center">Residential</th>
+    <th colspan="2" class="fh-d" style="text-align:center">Day Scholar</th>
+    <th colspan="2" class="fh-s" style="text-align:center">Semi Residential</th>
+  </tr>
+  <tr class="sub-r">
+    <th class="sr-r" style="text-align:left">Yr 1 Avg · Yr 2 Avg</th><th class="sr-r">Count</th>
+    <th class="sr-d" style="text-align:left">Yr 1 Avg · Yr 2 Avg</th><th class="sr-d">Count</th>
+    <th class="sr-s" style="text-align:left">Yr 1 Avg · Yr 2 Avg</th><th class="sr-s">Count</th>
+  </tr></thead><tbody>`;
+  rows.forEach((r,i)=>{
+    tblHtml+=`<tr><td><div class="sf-staff"><div class="sf-rank">${i+1}</div><span class="sf-name">${r.s}</span></div></td>
+    <td style="text-align:center"><span class="sf-adm">${r.adm}</span></td>`;
+    accoms.forEach((a,ai)=>{
+      const sepClass=['sf-sep-r','sf-sep-d','sf-sep-s'][ai];
+      const sd=d.filter(x=>x.staff===r.s&&x.accom===a);
+      if(sd.length){
+        tblHtml+=`<td class="sf-fee ${sepClass}"><div class="sf-y1">${fmtAmt(avgF(sd,'fee1'))}</div><div class="sf-y2">Yr 2 · ${fmtAmt(avgF(sd,'fee2'))}</div></td>
+        <td class="sf-n">${sd.length}</td>`;
+      } else {
+        tblHtml+=`<td class="sf-nil ${sepClass}">—</td><td class="sf-nil">—</td>`;
+      }
+    });
+    tblHtml+=`</tr>`;
+  });
+  tblHtml+=`</tbody>`;
+  $('staff-fee-tbl').innerHTML=tblHtml;
+}
+
+// ── TELE-COUNSELOR TAB ────────────────────────────────────────────────────
+function renderTele(d){
+  const teleMap={};
+  d.forEach(r=>{const t=r.tele||'—';teleMap[t]=(teleMap[t]||0)+1;});
+  const sorted=Object.entries(teleMap).sort((a,b)=>b[1]-a[1]);
+  const mx=sorted[0]?.[1]||1;
+  const cols=['#1D9E75','#5DCAA5','#9FE1CB','#C0DD97','#AFA9EC','#7F77DD','#534AB7','#3C3489','#26215C'];
+  $('tele-bars').innerHTML=sorted.map(([t,n],i)=>
+    `<div class="br"><div class="bl2" title="${t}">${t}</div><div class="bt"><div class="bf" style="width:${n/mx*100}%;background:${cols[i]||'#E1F5EE'}"></div></div><div class="bn2">${n}</div></div>`).join('');
+
+  // Tele x accommodation — count table
+  const accoms=['Residential','Day Scholar','Semi Residential'];
+  let tblHtml=`<tr><th class="tl">Tele-counselor</th><th>Residential</th><th>Day Scholar</th><th>Semi Resi</th><th>Total</th></tr>`;
+  sorted.forEach(([t])=>{
+    const td=d.filter(r=>(r.tele||'—')===t);
+    const rv=cnt(td,'accom','Residential'),dv=cnt(td,'accom','Day Scholar'),sv=cnt(td,'accom','Semi Residential');
+    tblHtml+=`<tr>
+      <td class="tl">${t}</td>
+      <td><span class="spill s-r">${rv}</span></td>
+      <td><span class="spill s-d">${dv}</span></td>
+      <td><span class="spill s-s">${sv}</span></td>
+      <td><b>${td.length}</b></td>
+    </tr>`;
+  });
+  // Grand total row
+  const rv=cnt(d,'accom','Residential'),dv=cnt(d,'accom','Day Scholar'),sv=cnt(d,'accom','Semi Residential');
+  tblHtml+=`<tr class="tr"><td class="tl">Grand total</td><td><span class="spill s-r">${rv}</span></td><td><span class="spill s-d">${dv}</span></td><td><span class="spill s-s">${sv}</span></td><td><b>${d.length}</b></td></tr>`;
+  $('tele-accom-tbl').innerHTML=tblHtml;
+}
+
+// ── FEE TAB ───────────────────────────────────────────────────────────────
+function renderFees(d){
+  const accoms=['Residential','Day Scholar','Semi Residential'];
+  const bgs=['var(--te50)','var(--bl50)','var(--am50)'];
+  const txts=[['var(--te600)','var(--te800)'],['var(--bl600)','var(--bl800)'],['var(--am600)','var(--am800)']];
+  $('fee-grid').innerHTML=accoms.map((a,i)=>{
+    const ad=d.filter(r=>r.accom===a);
+    const a1=avgF(ad,'fee1'),a2=avgF(ad,'fee2');
+    return `<div class="fc">
+      <div class="fh" style="background:${bgs[i]};color:${txts[i][1]}">${a} <span style="font-weight:400;opacity:.7">(${ad.length})</span></div>
+      <div class="fcard" style="background:${bgs[i]}"><div class="fyr" style="color:${txts[i][0]}">Avg Yr 1 Fee</div><div class="famt" style="color:${txts[i][1]}">${fmtAmt(a1)}</div></div>
+      <div class="fcard" style="background:${bgs[i]};opacity:.85"><div class="fyr" style="color:${txts[i][0]}">Avg Yr 2 Fee</div><div class="famt" style="color:${txts[i][1]}">${fmtAmt(a2)}</div></div>
+    </div>`;
+  }).join('');
+
+  // Staff revenue bars — stacked Yr1 + Yr2 with cumulative label
+  const staffList=Object.keys(STAFF_DATA);
+  const revRows=staffList.filter(s=>{
+    const sd=d.filter(r=>r.staff===s);
+    return sd.length>0;
+  }).map(s=>{
+    const sd=d.filter(r=>r.staff===s);
+    return{s,adm:sd.length,r1:sumF(sd,'fee1'),r2:sumF(sd,'fee2'),total:sumF(sd,'fee1')+sumF(sd,'fee2')};
+  }).sort((a,b)=>b.total-a.total);
+  const maxRev=revRows[0]?.total||1;
+  $('staff-revenue').innerHTML=`
+  <div style="display:flex;gap:14px;margin-bottom:12px;flex-wrap:wrap">
+    <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)"><span style="width:10px;height:10px;border-radius:2px;background:#534AB7;display:inline-block"></span>Yr 1 fee value</span>
+    <span style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)"><span style="width:10px;height:10px;border-radius:2px;background:#AFA9EC;display:inline-block"></span>Yr 2 fee value</span>
+  </div>`+
+  revRows.map((r,i)=>{
+    const yr1Pct=r.total?r.r1/maxRev*100:0;
+    const yr2Pct=r.total?r.r2/maxRev*100:0;
+    return `<div class="rev-row">
+      <div class="rev-name" title="${r.s}">${r.s}</div>
+      <div class="rev-track" style="position:relative">
+        <div style="display:flex;height:100%;border-radius:6px;overflow:hidden">
+          <div style="width:${yr1Pct}%;background:#534AB7;display:flex;align-items:center;justify-content:center;min-width:${r.r1>0?2:0}px">
+            ${yr1Pct>12?`<span style="font-size:10px;font-weight:500;color:#fff;white-space:nowrap;padding:0 4px">${fmtINR(r.r1)}</span>`:''}
+          </div>
+          <div style="width:${yr2Pct}%;background:#AFA9EC;display:flex;align-items:center;justify-content:center;min-width:${r.r2>0?2:0}px">
+            ${yr2Pct>12?`<span style="font-size:10px;font-weight:500;color:#26215C;white-space:nowrap;padding:0 4px">${fmtINR(r.r2)}</span>`:''}
+          </div>
+        </div>
+      </div>
+      <div style="flex-shrink:0;text-align:right;min-width:120px">
+        <div style="font-size:12px;font-weight:500;color:var(--text)">${fmtINR(r.total)}</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:1px">${fmtINR(r.r1)} + ${fmtINR(r.r2)} · ${r.adm} adm</div>
+      </div>
+    </div>`;
+  }).join('')+
+  `<div style="margin-top:12px;padding-top:10px;border-top:0.5px solid var(--border);display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+    <div style="background:var(--pu50);border-radius:8px;padding:10px 12px;text-align:center">
+      <div style="font-size:10px;color:var(--pu600);font-weight:500;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">Total Yr 1</div>
+      <div style="font-size:16px;font-weight:500;color:var(--pu900)">${fmtINR(revRows.reduce((a,r)=>a+r.r1,0))}</div>
+    </div>
+    <div style="background:#E1F5EE;border-radius:8px;padding:10px 12px;text-align:center">
+      <div style="font-size:10px;color:#0F6E56;font-weight:500;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">Total Yr 2</div>
+      <div style="font-size:16px;font-weight:500;color:#085041">${fmtINR(revRows.reduce((a,r)=>a+r.r2,0))}</div>
+    </div>
+    <div style="background:#EEEDFE;border-radius:8px;padding:10px 12px;text-align:center;border:1.5px solid #AFA9EC">
+      <div style="font-size:10px;color:#534AB7;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">Grand Total</div>
+      <div style="font-size:16px;font-weight:600;color:#26215C">${fmtINR(revRows.reduce((a,r)=>a+r.total,0))}</div>
+    </div>
+  </div>`;
+
+  // Avg fee table duplicated in fee tab
+  const sfRows=revRows.map(r=>({s:r.s,adm:r.adm}));
+  let tblHtml=`<thead><tr>
+    <th rowspan="2" style="text-align:left;width:32%">Staff member</th>
+    <th rowspan="2" style="text-align:center;width:9%">Adm.</th>
+    <th colspan="2" class="fh-r" style="text-align:center">Residential</th>
+    <th colspan="2" class="fh-d" style="text-align:center">Day Scholar</th>
+    <th colspan="2" class="fh-s" style="text-align:center">Semi Residential</th>
+  </tr>
+  <tr class="sub-r">
+    <th class="sr-r" style="text-align:left">Yr 1 Avg · Yr 2 Avg</th><th class="sr-r">Count</th>
+    <th class="sr-d" style="text-align:left">Yr 1 Avg · Yr 2 Avg</th><th class="sr-d">Count</th>
+    <th class="sr-s" style="text-align:left">Yr 1 Avg · Yr 2 Avg</th><th class="sr-s">Count</th>
+  </tr></thead><tbody>`;
+  sfRows.forEach((r,i)=>{
+    tblHtml+=`<tr><td><div class="sf-staff"><div class="sf-rank">${i+1}</div><span class="sf-name">${r.s}</span></div></td>
+    <td style="text-align:center"><span class="sf-adm">${r.adm}</span></td>`;
+    ['Residential','Day Scholar','Semi Residential'].forEach((a,ai)=>{
+      const sepClass=['sf-sep-r','sf-sep-d','sf-sep-s'][ai];
+      const sd=d.filter(x=>x.staff===r.s&&x.accom===a);
+      if(sd.length){
+        tblHtml+=`<td class="sf-fee ${sepClass}"><div class="sf-y1">${fmtAmt(avgF(sd,'fee1'))}</div><div class="sf-y2">Yr 2 · ${fmtAmt(avgF(sd,'fee2'))}</div></td><td class="sf-n">${sd.length}</td>`;
+      } else {
+        tblHtml+=`<td class="sf-nil ${sepClass}">—</td><td class="sf-nil">—</td>`;
+      }
+    });
+    tblHtml+=`</tr>`;
+  });
+  tblHtml+=`</tbody>`;
+  if($('staff-fee-tbl2')) $('staff-fee-tbl2').innerHTML=tblHtml;
+
+  const ctx=$('fee-chart');
+  if(feeCI)feeCI.destroy();
+  const bins=['<75k','75k-1L','1L-1.25L','1.25L-1.5L','>1.5L'],bc=[0,0,0,0,0];
+  d.forEach(r=>{const f=r.fee1;if(f<75000)bc[0]++;else if(f<100000)bc[1]++;else if(f<125000)bc[2]++;else if(f<150000)bc[3]++;else bc[4]++;});
+  feeCI=new Chart(ctx,{type:'bar',data:{labels:bins,datasets:[{label:'Students',data:bc,backgroundColor:['#B5D4F4','#85B7EB','#7F77DD','#534AB7','#3C3489'],borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{ticks:{font:{size:11},color:'#888780'},grid:{display:false}},
+              y:{ticks:{font:{size:11},color:'#888780',stepSize:1},grid:{color:'rgba(136,135,128,0.07)'}}}}});
+}
+
+// ── DATA TABLE ────────────────────────────────────────────────────────────
+function srtTbl(k){if(srtKey===k)srtDir*=-1;else{srtKey=k;srtDir=1;}renderTable();}
+function renderTable(){
+  const srch=($('srch-inp').value||'').toLowerCase();
+  const fc=$('f-course').value;
+  let rows=getFiltered().filter(r=>{
+    const m=!srch||[r.student,r.staff,r.course,r.tele].some(v=>(v||'').toLowerCase().includes(srch));
+    return m&&(!fc||r.course===fc);
+  });
+  rows.sort((a,b)=>{let av=a[srtKey]||'',bv=b[srtKey]||'';if(typeof av==='number')return(av-bv)*srtDir;return av.toString().localeCompare(bv.toString())*srtDir;});
+  const tot=rows.length,pages=Math.ceil(tot/PER_PAGE)||1;
+  if(curPage>pages)curPage=1;
+  const sl=rows.slice((curPage-1)*PER_PAGE,curPage*PER_PAGE);
+  $('dtbody').innerHTML=sl.map(r=>`<tr>
+    <td>${r.date}</td><td>${r.student}</td><td>${r.staff}</td>
+    <td><span class="pill pc">${r.course}</span></td>
+    <td><span class="pill ${r.gender==='Male'?'pm':'pf'}">${r.gender}</span></td>
+    <td><span class="pill ${r.accom==='Residential'?'pr':r.accom==='Day Scholar'?'pd':'ps'}">${r.accom}</span></td>
+    <td class="fc2">${fmtAmt(r.fee1)}</td><td class="fc2">${r.fee2?fmtAmt(r.fee2):'—'}</td>
+    <td>${r.tele||'—'}</td></tr>`).join('');
+  txt('pg-info',`${Math.min((curPage-1)*PER_PAGE+1,tot)}–${Math.min(curPage*PER_PAGE,tot)} of ${tot}`);
+  txt('sb-tot',allData.length);
+  let pb='';
+  if(curPage>1)pb+=`<button class="pbtn" onclick="goPg(${curPage-1})">←</button>`;
+  for(let p=Math.max(1,curPage-2);p<=Math.min(pages,curPage+2);p++)pb+=`<button class="pbtn ${p===curPage?'active':''}" onclick="goPg(${p})">${p}</button>`;
+  if(curPage<pages)pb+=`<button class="pbtn" onclick="goPg(${curPage+1})">→</button>`;
+  $('pg-btns').innerHTML=pb;
+}
+function goPg(p){curPage=p;renderTable();}
+
+// ── TAB SWITCHING ─────────────────────────────────────────────────────────
+function switchTab(id,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  $('panel-'+id).classList.add('active');
+  if(id==='data')renderTable();
+  if(id==='academic'){const d=getFiltered();renderAccomGender(d);renderCourseBars(d);renderPivot(d);}
+}
+
+// ── LIVE DATA LOAD ────────────────────────────────────────────────────────
+function isLiveEnvironment(){
+  try{
+    const loc=window.location.href;
+    // Running as a real file or hosted page — not inside claude.ai iframe preview
+    return loc.startsWith('file://') || loc.startsWith('http://localhost') ||
+           (!loc.includes('claude.ai') && !loc.includes('anthropic.com') && loc.startsWith('https://'));
+  }catch(e){return false;}
+}
+
+async function loadData(){
+  if(!isLiveEnvironment()){
+    $('sdot').style.background='#5DCAA5';
+    txt('sync-time','saved data (29 Apr 2026)');
+    txt('sb-time','Saved 29 Apr 2026');
+    const notice=$('notice');
+    notice.style.display='block';
+    notice.style.background='#E6F1FB';
+    notice.style.color='#0C447C';
+    notice.style.borderColor='#85B7EB44';
+    notice.innerHTML='<b>Preview mode:</b> Showing saved data from 29 Apr 2026. Download this file and open in your browser, or host on GitHub Pages to see live OneDrive data.';
+    renderAll();
+    return;
+  }
+  $('sdot').style.background='#EF9F27';
+  try{
+    const resp=await fetch(ONEDRIVE_URL,{cache:'no-cache'});
+    if(!resp.ok) throw new Error('HTTP '+resp.status);
+    const buf=await resp.arrayBuffer();
+    const wb=XLSX.read(buf,{type:'array'});
+    const ws=wb.Sheets['Data_Entry_Visits'];
+    if(!ws) throw new Error('Sheet not found');
+    const raw=XLSX.utils.sheet_to_json(ws);
+
+    // ── Parse admissions
+    const parsed=raw.filter(r=>r['Admission']===1).map(r=>{
+      const dv=r['Date Only']; let ds='—';
+      if(typeof dv==='number'){const dt=new Date(Math.round((dv-25569)*86400*1000));ds=dt.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}
+      else if(dv) ds=String(dv);
+      return{date:ds,staff:String(r['Staff']||'').trim(),student:String(r['Contact']||'').trim(),
+        gender:String(r['Gender ']||'').trim(),accom:String(r['Admission Type']||'').trim(),
+        course:String(r['Course Name']||'').trim(),
+        fee1:Number(r['1st Year Fee + Other Expenses'])||0,
+        fee2:Number(r['2nd Year Fee + Other Expenses'])||0,
+        tele:String(r['Tele Counselor']||'').trim()};
+    });
+    if(parsed.length>0){allData=parsed; $('notice').style.display='none';}
+
+    // ── Update FV / CV totals from full raw sheet
+    let liveFV=0, liveCV=0;
+    raw.forEach(r=>{
+      if(r['Field Visit']===1) liveFV++;
+      if(r['Campus Visit ']===1) liveCV++;
+    });
+    if(liveFV>0){ TOTAL_FV_LIVE=liveFV; TOTAL_CV_LIVE=liveCV; }
+
+    // ── Rebuild monthly data
+    const monthMap={};
+    raw.forEach(r=>{
+      const dv=r['Month Year'];
+      if(!dv) return;
+      let mLabel='';
+      try{
+        const d=typeof dv==='number'?new Date(Math.round((dv-25569)*86400*1000)):new Date(dv);
+        mLabel=d.toLocaleString('default',{month:'short',year:'2-digit'}).replace(' ',' ');
+      }catch(e){return;}
+      if(!monthMap[mLabel]) monthMap[mLabel]={m:mLabel,fv:0,cv:0,adm:0};
+      if(r['Field Visit']===1) monthMap[mLabel].fv++;
+      if(r['Campus Visit ']===1) monthMap[mLabel].cv++;
+      if(r['Admission']===1) monthMap[mLabel].adm++;
+    });
+    const monthOrder=['Oct 25','Nov 25','Dec 25','Jan 26','Feb 26','Mar 26','Apr 26','May 26','Jun 26'];
+    const rebuilt=monthOrder.map(m=>monthMap[m]).filter(Boolean);
+    if(rebuilt.length>0) MONTHLY_LIVE=[...rebuilt];
+
+    $('sdot').style.background='#5DCAA5';
+    const now=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+    txt('sync-time',now);
+    txt('sb-time',new Date().toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}));
+  }catch(e){
+    $('sdot').style.background='#E24B4A';
+    $('notice').style.display='block';
+    $('notice-detail').textContent='('+e.message+')';
+    txt('sync-time',new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})+' (cached)');
+  }
+  renderAll(); startCountdown();
+}
+
+let cdTimer;
+function startCountdown(){
+  clearInterval(cdTimer);let s=300;
+  cdTimer=setInterval(()=>{s--;const m=Math.floor(s/60),sc=s%60;
+    txt('sb-next',m>0?`${m}m ${sc}s`:`${sc}s`);
+    if(s<=0){clearInterval(cdTimer);loadData();}},1000);
+}
+
+window.addEventListener('DOMContentLoaded',()=>{
+  // Always render saved data immediately — no blank screen
+  renderAll();
+  txt('sync-time','loading…');
+  // Then attempt live fetch
+  loadData();
+  setInterval(loadData,REFRESH_MS);
+});
+</script>
+</body>
+</html>
