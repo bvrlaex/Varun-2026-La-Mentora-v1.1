@@ -1173,15 +1173,26 @@ async function loadData(){
       const url = proxy + encodeURIComponent(ONEDRIVE_DIRECT);
       const resp = await fetch(url, {cache:'no-cache'});
       if(!resp.ok) throw new Error('HTTP '+resp.status);
-      buf = await resp.arrayBuffer();
-      break; // success — stop trying proxies
+      const bytes = await resp.arrayBuffer();
+      // Check it's actually an Excel file (not an HTML error page)
+      const header = new Uint8Array(bytes.slice(0,4));
+      const isPK = header[0]===80 && header[1]===75; // ZIP/XLSX magic bytes
+      const isCFB = header[0]===0xD0 && header[1]===0xCF; // old XLS
+      if(!isPK && !isCFB) throw new Error('Not an Excel file (got HTML redirect)');
+      buf = bytes;
+      break;
     }catch(e){ lastErr=e.message; buf=null; }
   }
   try{
     if(!buf) throw new Error('All proxies failed: '+lastErr);
     const wb=XLSX.read(buf,{type:'array'});
-    const ws=wb.Sheets['Data_Entry_Visits'];
-    if(!ws) throw new Error('Sheet not found');
+    // Try exact name first, then fuzzy match
+    let ws = wb.Sheets['Data_Entry_Visits'];
+    if(!ws){
+      const match = wb.SheetNames.find(n=>n.replace(/\s+/g,'_').toLowerCase()==='data_entry_visits');
+      if(match) ws = wb.Sheets[match];
+    }
+    if(!ws) throw new Error('Sheet not found. Available: '+wb.SheetNames.join(', '));
     const raw=XLSX.utils.sheet_to_json(ws);
 
     // ── Parse admissions
