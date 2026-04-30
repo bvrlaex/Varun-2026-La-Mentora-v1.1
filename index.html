@@ -468,14 +468,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14
 
 <script>
 // ── CONFIG ────────────────────────────────────────────────────────────────
-const ONEDRIVE_DIRECT = 'https://api.onedrive.com/v1.0/shares/u!aHR0cHM6Ly8xZHJ2Lm1zL3gvYy9iN2ZkYmJkZGMwYTBjYzdjL0lRQjV4MFpINjdBaVJweGZJVy11NDlMZ0FUYjdINm5sYXVrY0lnSVpmclNlc3FRP2U9WTdSWFNx/root/content';
-// CORS proxies — tried in order until one works
-const CORS_PROXIES = [
-  'https://corsproxy.io/?',
-  'https://api.allorigins.win/raw?url=',
-  'https://cors-anywhere.herokuapp.com/'
-];
-const ONEDRIVE_URL = CORS_PROXIES[0] + encodeURIComponent(ONEDRIVE_DIRECT);
+const GSHEET_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSe485XmKnTWahSPMTILyQQVLmm6F_pCZ_YcQi6HakgAZYoPvLnVXaY7am5Vf8YD2h9HSsPVmA6rAP2/pub?gid=0&single=true&output=csv';
 const REFRESH_MS = 5*60*1000;
 
 // ── STATIC VISIT DATA (field+campus by month, staff) ─────────────────────
@@ -1143,13 +1136,36 @@ function switchTab(id,el){
 }
 
 // ── LIVE DATA LOAD ────────────────────────────────────────────────────────
+// ── LIVE DATA LOAD ────────────────────────────────────────────────────────
 function isLiveEnvironment(){
   try{
     const loc=window.location.href;
-    // Running as a real file or hosted page — not inside claude.ai iframe preview
     return loc.startsWith('file://') || loc.startsWith('http://localhost') ||
            (!loc.includes('claude.ai') && !loc.includes('anthropic.com') && loc.startsWith('https://'));
   }catch(e){return false;}
+}
+
+function parseCSV(text){
+  const lines=text.trim().split('\n');
+  if(lines.length<2) return [];
+  const parseRow=row=>{
+    const result=[];let cur='',inQ=false;
+    for(let i=0;i<row.length;i++){
+      const c=row[i];
+      if(c==='"'){inQ=!inQ;}
+      else if(c===','&&!inQ){result.push(cur.trim());cur='';}
+      else cur+=c;
+    }
+    result.push(cur.trim());
+    return result;
+  };
+  const headers=parseRow(lines[0]);
+  return lines.slice(1).filter(l=>l.trim()).map(line=>{
+    const vals=parseRow(line);
+    const obj={};
+    headers.forEach((h,i)=>obj[h]=vals[i]||'');
+    return obj;
+  });
 }
 
 async function loadData(){
@@ -1162,75 +1178,69 @@ async function loadData(){
     notice.style.background='#E6F1FB';
     notice.style.color='#0C447C';
     notice.style.borderColor='#85B7EB44';
-    notice.innerHTML='<b>Preview mode:</b> Showing saved data from 29 Apr 2026. Download this file and open in your browser, or host on GitHub Pages to see live OneDrive data.';
+    notice.innerHTML='<b>Preview mode:</b> Showing saved data from 29 Apr 2026. Download and open in browser for live data.';
     renderAll();
     return;
   }
   $('sdot').style.background='#EF9F27';
-  let buf=null, lastErr='';
-  for(const proxy of CORS_PROXIES){
-    try{
-      const url = proxy + encodeURIComponent(ONEDRIVE_DIRECT);
-      const resp = await fetch(url, {cache:'no-cache'});
-      if(!resp.ok) throw new Error('HTTP '+resp.status);
-      const bytes = await resp.arrayBuffer();
-      // Check it's actually an Excel file (not an HTML error page)
-      const header = new Uint8Array(bytes.slice(0,4));
-      const isPK = header[0]===80 && header[1]===75; // ZIP/XLSX magic bytes
-      const isCFB = header[0]===0xD0 && header[1]===0xCF; // old XLS
-      if(!isPK && !isCFB) throw new Error('Not an Excel file (got HTML redirect)');
-      buf = bytes;
-      break;
-    }catch(e){ lastErr=e.message; buf=null; }
-  }
   try{
-    if(!buf) throw new Error('All proxies failed: '+lastErr);
-    const wb=XLSX.read(buf,{type:'array'});
-    // Try exact name first, then fuzzy match
-    let ws = wb.Sheets['Data_Entry_Visits'];
-    if(!ws){
-      const match = wb.SheetNames.find(n=>n.replace(/\s+/g,'_').toLowerCase()==='data_entry_visits');
-      if(match) ws = wb.Sheets[match];
-    }
-    if(!ws) throw new Error('Sheet not found. Available: '+wb.SheetNames.join(', '));
-    const raw=XLSX.utils.sheet_to_json(ws);
+    const resp=await fetch(GSHEET_CSV,{cache:'no-cache'});
+    if(!resp.ok) throw new Error('HTTP '+resp.status);
+    const text=await resp.text();
+    if(!text||text.trim().length<10) throw new Error('Empty response');
+    const raw=parseCSV(text);
+    if(raw.length===0) throw new Error('No rows parsed');
 
-    // ── Parse admissions
-    const parsed=raw.filter(r=>r['Admission']===1).map(r=>{
-      const dv=r['Date Only']; let ds='—';
-      if(typeof dv==='number'){const dt=new Date(Math.round((dv-25569)*86400*1000));ds=dt.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}
-      else if(dv) ds=String(dv);
-      return{date:ds,staff:String(r['Staff']||'').trim(),student:String(r['Contact']||'').trim(),
-        gender:String(r['Gender ']||'').trim(),accom:String(r['Admission Type']||'').trim(),
+    // Parse admissions
+    const parsed=raw.filter(r=>String(r['Admission']).trim()==='1').map(r=>{
+      const dv=r['Date Only']||'';
+      let ds='—';
+      if(dv&&!isNaN(Number(dv))&&Number(dv)>1000){
+        const dt=new Date(Math.round((Number(dv)-25569)*86400*1000));
+        ds=dt.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+      } else if(dv&&dv!=='') ds=dv;
+      return{
+        date:ds,
+        staff:String(r['Staff']||'').trim(),
+        student:String(r['Contact']||'').trim(),
+        gender:String(r['Gender '||'Gender']||'').trim()||String(r['Gender']||'').trim(),
+        accom:String(r['Admission Type']||'').trim(),
         course:String(r['Course Name']||'').trim(),
-        fee1:Number(r['1st Year Fee + Other Expenses'])||0,
-        fee2:Number(r['2nd Year Fee + Other Expenses'])||0,
-        tele:String(r['Tele Counselor']||'').trim()};
+        fee1:Number(String(r['1st Year Fee + Other Expenses']||'0').replace(/[^0-9.]/g,''))||0,
+        fee2:Number(String(r['2nd Year Fee + Other Expenses']||'0').replace(/[^0-9.]/g,''))||0,
+        tele:String(r['Tele Counselor']||'').trim()
+      };
     });
-    if(parsed.length>0){allData=parsed; $('notice').style.display='none';}
+    if(parsed.length>0){allData=parsed;$('notice').style.display='none';}
 
-    // ── Update FV / CV totals from full raw sheet
-    let liveFV=0, liveCV=0;
+    // Update FV/CV totals
+    let liveFV=0,liveCV=0;
     raw.forEach(r=>{
-      if(r['Field Visit']===1) liveFV++;
-      if(r['Campus Visit ']===1) liveCV++;
+      if(String(r['Field Visit']).trim()==='1') liveFV++;
+      if(String(r['Campus Visit ']||r['Campus Visit']||'').trim()==='1') liveCV++;
     });
-    if(liveFV>0){ TOTAL_FV_LIVE=liveFV; TOTAL_CV_LIVE=liveCV; }
+    if(liveFV>0){TOTAL_FV_LIVE=liveFV;TOTAL_CV_LIVE=liveCV;}
 
-    // ── Rebuild monthly data
+    // Rebuild monthly trend
     const monthMap={};
     raw.forEach(r=>{
-      const dv=r['Month Year'];
-      if(!dv) return;
+      const my=r['Month Year']||'';
+      if(!my) return;
       let mLabel='';
       try{
-        const d=typeof dv==='number'?new Date(Math.round((dv-25569)*86400*1000)):new Date(dv);
-        mLabel=d.toLocaleString('default',{month:'short',year:'2-digit'}).replace(' ',' ');
-      }catch(e){return;}
+        if(!isNaN(Number(my))&&Number(my)>1000){
+          const d=new Date(Math.round((Number(my)-25569)*86400*1000));
+          mLabel=d.toLocaleString('default',{month:'short',year:'2-digit'});
+        } else {
+          const d=new Date(my);
+          if(!isNaN(d)) mLabel=d.toLocaleString('default',{month:'short',year:'2-digit'});
+        }
+      }catch(e){}
+      if(!mLabel) return;
       if(!monthMap[mLabel]) monthMap[mLabel]={m:mLabel,fv:0,cv:0,adm:0};
-      if(r['Field Visit']===1) monthMap[mLabel].fv++;
-      if(r['Campus Visit ']===1) monthMap[mLabel].cv++;
-      if(r['Admission']===1) monthMap[mLabel].adm++;
+      if(String(r['Field Visit']).trim()==='1') monthMap[mLabel].fv++;
+      if(String(r['Campus Visit ']||r['Campus Visit']||'').trim()==='1') monthMap[mLabel].cv++;
+      if(String(r['Admission']).trim()==='1') monthMap[mLabel].adm++;
     });
     const monthOrder=['Oct 25','Nov 25','Dec 25','Jan 26','Feb 26','Mar 26','Apr 26','May 26','Jun 26'];
     const rebuilt=monthOrder.map(m=>monthMap[m]).filter(Boolean);
@@ -1246,7 +1256,7 @@ async function loadData(){
     $('notice-detail').textContent='('+e.message+')';
     txt('sync-time',new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})+' (cached)');
   }
-  renderAll(); startCountdown();
+  renderAll();startCountdown();
 }
 
 let cdTimer;
