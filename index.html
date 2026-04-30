@@ -1196,7 +1196,10 @@ async function loadData(){
     if(raw.length===0) throw new Error('No rows parsed');
 
     // Parse admissions
-    const parsed=raw.filter(r=>String(r['Admission']).trim()==='1').map(r=>{
+    const parsed=raw.filter(r=>{
+      const v=String(r['Admission']||'').trim();
+      return v==='1'||v==='1.0'||Number(v)===1;
+    }).map(r=>{
       const dv=r['Date Only']||'';
       let ds='—';
       if(dv&&!isNaN(Number(dv))&&Number(dv)>1000){
@@ -1217,15 +1220,17 @@ async function loadData(){
     });
     if(parsed.length>0){allData=parsed;$('notice').style.display='none';}
 
-    // Update FV/CV totals
+    // Update FV/CV totals — handle both '1' string and 1 number from CSV
     let liveFV=0,liveCV=0;
     raw.forEach(r=>{
-      if(String(r['Field Visit']).trim()==='1') liveFV++;
-      if(String(r['Campus Visit ']||r['Campus Visit']||'').trim()==='1') liveCV++;
+      const fv=String(r['Field Visit']||'').trim();
+      const cv=String(r['Campus Visit ']||r['Campus Visit']||'').trim();
+      if(fv==='1'||fv==='1.0'||Number(fv)===1) liveFV++;
+      if(cv==='1'||cv==='1.0'||Number(cv)===1) liveCV++;
     });
     if(liveFV>0){TOTAL_FV_LIVE=liveFV;TOTAL_CV_LIVE=liveCV;}
 
-    // Rebuild monthly trend
+    // Rebuild monthly trend — handle text strings from CSV
     const monthMap={};
     raw.forEach(r=>{
       const my=r['Month Year']||'';
@@ -1242,9 +1247,12 @@ async function loadData(){
       }catch(e){}
       if(!mLabel) return;
       if(!monthMap[mLabel]) monthMap[mLabel]={m:mLabel,fv:0,cv:0,adm:0};
-      if(String(r['Field Visit']).trim()==='1') monthMap[mLabel].fv++;
-      if(String(r['Campus Visit ']||r['Campus Visit']||'').trim()==='1') monthMap[mLabel].cv++;
-      if(String(r['Admission']).trim()==='1') monthMap[mLabel].adm++;
+      const fvv=String(r['Field Visit']||'').trim();
+      const cvv=String(r['Campus Visit ']||r['Campus Visit']||'').trim();
+      const admv=String(r['Admission']||'').trim();
+      if(fvv==='1'||Number(fvv)===1) monthMap[mLabel].fv++;
+      if(cvv==='1'||Number(cvv)===1) monthMap[mLabel].cv++;
+      if(admv==='1'||Number(admv)===1) monthMap[mLabel].adm++;
     });
     const monthOrder=['Oct 25','Nov 25','Dec 25','Jan 26','Feb 26','Mar 26','Apr 26','May 26','Jun 26'];
     const rebuilt=monthOrder.map(m=>monthMap[m]).filter(Boolean);
