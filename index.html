@@ -738,16 +738,20 @@ function renderAllStaffFunnels(){
 
 function setStaffMonth(i,s,mon,el){
   const chipsEl=$(`sf-chips-${i}`); if(!chipsEl) return;
-  chipsEl.querySelectorAll('.sf-chip').forEach(c=>{
+  // Reset ALL chips in this group
+  chipsEl.querySelectorAll('span').forEach(c=>{
     c.style.background='var(--surface)';
     c.style.borderColor='var(--border)';
     c.style.color='var(--muted)';
     c.style.fontWeight='400';
+    c.style.boxShadow='none';
   });
+  // Highlight selected chip
   el.style.background='#EEEDFE';
   el.style.borderColor='#7F77DD';
   el.style.color='#3C3489';
-  el.style.fontWeight='500';
+  el.style.fontWeight='600';
+  el.style.boxShadow='0 0 0 2px #AFA9EC';
   refreshOneFunnel(i,s,mon);
 }
 
